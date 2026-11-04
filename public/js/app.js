@@ -2,8 +2,14 @@
   'use strict';
   const CONFIG = {
     gasUrl: 'https://script.google.com/macros/s/AKfycbxe9zt4vCzW5XYA0NrADf0u4KHY8SZ5o8-T7RkGgH1zOuJXQ23BIAqldwrz8wfeuPOA/exec',
-    databaseUrl: 'https://pure-status-default-rtdb.firebaseio.com'
+    databaseUrl: 'https://pure-status-default-rtdb.firebaseio.com',
+    dbSecret: 'qOSyfYhPPo5jsflKMVmHefsIdMTaqd5pxfxwaA1A'
   };
+  function getDbUrl(endpoint) {
+    const clean = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+    const auth = CONFIG.dbSecret ? '?auth=' + encodeURIComponent(CONFIG.dbSecret) : '';
+    return CONFIG.databaseUrl + clean + '.json' + auth;
+  }
   const uploadForm = document.getElementById('uploadForm');
   const dropZone = document.getElementById('dropZone');
   const fileInput = document.getElementById('fileInput');
@@ -33,7 +39,6 @@
   const retryBtn = document.getElementById('retryBtn');
   let selectedFile = null;
   let pollInterval = null;
-  const isServerHosted = window.location.protocol.startsWith('http') && (window.location.port || window.location.hostname !== '');
   dropZone.addEventListener('click', function() {
     fileInput.click();
   });
@@ -166,29 +171,16 @@
         progress: 30,
         createdAt: Date.now()
       };
-      let submitted = false;
-      if (isServerHosted) {
-        try {
-          const apiRes = await fetch('/api/jobs', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(jobPayload)
-          });
-          if (apiRes.ok) submitted = true;
-        } catch (apiErr) {}
-      }
-      if (!submitted) {
-        await fetch(CONFIG.databaseUrl + '/jobs/' + jobId + '.json', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(jobPayload)
-        });
-        await fetch(CONFIG.databaseUrl + '/queue/' + jobId + '.json', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(jobPayload)
-        });
-      }
+      await fetch(getDbUrl('/jobs/' + jobId), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jobPayload)
+      });
+      await fetch(getDbUrl('/queue/' + jobId), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jobPayload)
+      });
       startPollingJob(jobId);
     } catch (err) {
       handleJobError(err.message || 'Terjadi kesalahan sistem.');
@@ -198,17 +190,8 @@
     if (pollInterval) clearInterval(pollInterval);
     pollInterval = setInterval(async function() {
       try {
-        let job = null;
-        if (isServerHosted) {
-          try {
-            const apiRes = await fetch('/api/jobs/' + jobId);
-            if (apiRes.ok) job = await apiRes.json();
-          } catch (e) {}
-        }
-        if (!job) {
-          const response = await fetch(CONFIG.databaseUrl + '/jobs/' + jobId + '.json');
-          job = await response.json();
-        }
+        const response = await fetch(getDbUrl('/jobs/' + jobId));
+        const job = await response.json();
         if (!job) return;
         if (job.status === 'processing' || job.status === 'compressing') {
           setStepStatus(stepUpload, 'completed');
