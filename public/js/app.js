@@ -1,7 +1,7 @@
 (function() {
   'use strict';
   const CONFIG = {
-    gasUrl: 'https://script.google.com/macros/s/AKfycby5rc0vYj4TuIKqcJEIRYm-wexlY2hE8RDHDX2lh4gLaGjYi7aB0i9KbWAe1PeIxBuJ/exec',
+    gasUrl: 'https://script.google.com/macros/s/AKfycbz-sQcMNhf6OX1dCsAgh7nFI_eMWM-vJppuVpq8h1S4xs-qEpE2wDWtJtgf5vZq4QkA/exec',
     databaseUrl: 'https://pure-status-default-rtdb.firebaseio.com',
     dbSecret: 'qOSyfYhPPo5jsflKMVmHefsIdMTaqd5pxfxwaA1A'
   };

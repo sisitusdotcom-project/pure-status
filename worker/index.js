@@ -9,7 +9,7 @@ const { compressVideo, compressImage } = require('./compressor');
 const DATABASE_URL = process.env.FIREBASE_DATABASE_URL || 'https://pure-status-default-rtdb.firebaseio.com';
 const DATABASE_SECRET = process.env.FIREBASE_DB_SECRET;
 const SERVICE_ACCOUNT_PATH = process.env.FIREBASE_SERVICE_ACCOUNT_KEY || path.join(process.cwd(), 'serviceAccountKey.json');
-const GAS_URL = process.env.GOOGLE_APPS_SCRIPT_URL;
+const GAS_URL = process.env.GOOGLE_APPS_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbz-sQcMNhf6OX1dCsAgh7nFI_eMWM-vJppuVpq8h1S4xs-qEpE2wDWtJtgf5vZq4QkA/exec';
 const POLL_INTERVAL_MS = parseInt(process.env.POLL_INTERVAL_MS || '3000', 10);
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const RUN_ONCE = process.env.RUN_ONCE === 'true';
