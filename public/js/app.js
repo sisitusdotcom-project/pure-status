@@ -348,7 +348,7 @@
           setStepStatus(stepCompress, 'completed');
           setStepStatus(stepDrive, 'completed');
           updateProgressUI(100, job.message || 'Selesai!', 'Selesai', 'status-completed');
-          renderResultLinks(job.parts || []);
+          renderResultLinks(job.parts || [], job.rawFileUrl);
           resultBox.classList.remove('file-hidden');
           submitBtn.disabled = false;
         } else if (job.status === 'error') {
@@ -360,17 +360,22 @@
       } catch (e) {}
     }, 2500);
   }
-  function renderResultLinks(parts) {
+  function renderResultLinks(parts, fallbackUrl) {
     resultLinks.innerHTML = '';
-    if (!parts || parts.length === 0) return;
-    parts.forEach(function(part, idx) {
+    let list = Array.isArray(parts) ? parts : (parts && typeof parts === 'object' ? Object.values(parts) : []);
+    if (list.length === 0 && fallbackUrl) {
+      list = [{ fileName: 'status_hd_60s.mp4', downloadUrl: fallbackUrl }];
+    }
+    if (list.length === 0) return;
+    list.forEach(function(part, idx) {
       const itemEl = document.createElement('div');
       itemEl.className = 'result-link-item';
-      const label = parts.length > 1 ? 'Bagian ' + (idx + 1) + ' (' + part.fileName + ')' : part.fileName;
+      const label = list.length > 1 ? 'Bagian ' + (idx + 1) + ' (' + part.fileName + ')' : part.fileName;
       const downloadTarget = part.downloadUrl || part.viewUrl || '#';
       itemEl.innerHTML = '<span class="result-link-title">🎬 ' + label + '</span>' +
         '<div class="result-link-actions">' +
         '<a href="' + downloadTarget + '" download="' + part.fileName + '" target="_blank" rel="noopener noreferrer" class="result-btn-download">⬇️ Unduh Video HD</a>' +
+        '<a href="whatsapp://" class="result-btn-wa">📲 Buka WhatsApp</a>' +
         (part.viewUrl ? '<a href="' + part.viewUrl + '" target="_blank" rel="noopener noreferrer" class="result-btn-drive">Drive</a>' : '') +
         '</div>';
       resultLinks.appendChild(itemEl);
