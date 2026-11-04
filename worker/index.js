@@ -17,6 +17,7 @@ const WA_CONFIG = {
 };
 const POLL_INTERVAL_MS = parseInt(process.env.POLL_INTERVAL_MS || '3000', 10);
 const PORT = parseInt(process.env.PORT || '3000', 10);
+const RUN_ONCE = process.env.RUN_ONCE === 'true';
 const TMP_DIR = path.join(__dirname, 'tmp');
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 if (!fs.existsSync(TMP_DIR)) {
@@ -153,6 +154,20 @@ async function pollQueue() {
     isProcessing = false;
   }
 }
+async function runSingleBatch() {
+  try {
+    const queue = await rtdb.getQueue();
+    if (queue && typeof queue === 'object') {
+      const jobIds = Object.keys(queue);
+      for (let i = 0; i < jobIds.length; i++) {
+        const currentJobId = jobIds[i];
+        const currentJob = queue[currentJobId];
+        await processJob(currentJobId, currentJob);
+      }
+    }
+  } catch (err) {}
+  process.exit(0);
+}
 const mimeMap = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -226,8 +241,12 @@ const server = http.createServer((req, res) => {
     res.end('Not Found');
   }
 });
-server.listen(PORT, () => {
-  process.stdout.write(`WhatsApp Pure Status Worker & Web berjalan di port ${PORT}\n`);
-});
-setInterval(pollQueue, POLL_INTERVAL_MS);
-pollQueue();
+if (RUN_ONCE) {
+  runSingleBatch();
+} else {
+  server.listen(PORT, () => {
+    process.stdout.write(`WhatsApp Pure Status Worker & Web berjalan di port ${PORT}\n`);
+  });
+  setInterval(pollQueue, POLL_INTERVAL_MS);
+  pollQueue();
+}
