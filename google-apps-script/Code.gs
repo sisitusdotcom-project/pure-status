@@ -86,7 +86,7 @@ function uploadToDrive(data) {
   try {
     file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   } catch (err) {}
-  const fileUrl = 'https://drive.google.com/uc?export=download&id=' + file.getId();
+  const fileUrl = 'https://drive.usercontent.google.com/download?id=' + file.getId() + '&export=download';
   const viewUrl = 'https://drive.google.com/file/d/' + file.getId() + '/view';
   return jsonResponse({
     status: 'success',

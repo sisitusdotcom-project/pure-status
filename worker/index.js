@@ -97,7 +97,7 @@ async function processJob(jobId, jobData) {
           totalParts: item.totalParts,
           fileName: item.fileName,
           fileId: driveRes.fileId,
-          downloadUrl: driveRes.downloadUrl,
+          downloadUrl: driveRes.fileId ? ('https://drive.usercontent.google.com/download?id=' + driveRes.fileId + '&export=download') : driveRes.downloadUrl,
           viewUrl: driveRes.viewUrl
         });
       }

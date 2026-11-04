@@ -365,13 +365,56 @@
       } catch (e) {}
     }, 2500);
   }
-  function triggerAutoDownload(url) {
-    if (!url) return false;
+  function getDirectDownloadUrl(part) {
+    let fileId = part.fileId || '';
+    if (!fileId && part.downloadUrl) {
+      const m = part.downloadUrl.match(/id=([a-zA-Z0-9_-]+)/);
+      if (m) fileId = m[1];
+    }
+    if (!fileId && part.viewUrl) {
+      const m2 = part.viewUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (m2) fileId = m2[1];
+    }
+    if (fileId) {
+      return 'https://drive.usercontent.google.com/download?id=' + fileId + '&export=download';
+    }
+    return part.downloadUrl || part.viewUrl || '#';
+  }
+  async function downloadBlobFile(url, fileName, btnEl) {
+    if (btnEl) {
+      btnEl.disabled = true;
+      btnEl.innerHTML = '<i class="ph-bold ph-arrow-clockwise"></i> Mengunduh...';
+    }
     try {
-      const win = window.open(url, '_blank');
-      return !(!win || win.closed || typeof win.closed === 'undefined');
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 15000);
+      if (btnEl) {
+        btnEl.disabled = false;
+        btnEl.innerHTML = '<i class="ph-bold ph-check"></i> Tersimpan';
+        setTimeout(function() {
+          if (btnEl) btnEl.innerHTML = '<i class="ph-bold ph-download-simple"></i> Unduh Lagi';
+        }, 3000);
+      }
     } catch (e) {
-      return false;
+      const direct = document.createElement('a');
+      direct.href = url;
+      direct.download = fileName;
+      document.body.appendChild(direct);
+      direct.click();
+      document.body.removeChild(direct);
+      if (btnEl) {
+        btnEl.disabled = false;
+        btnEl.innerHTML = '<i class="ph-bold ph-download-simple"></i> Unduh File';
+      }
     }
   }
   function renderResultLinks(parts, fallbackUrl) {
@@ -385,27 +428,20 @@
       const itemEl = document.createElement('div');
       itemEl.className = 'result-link-item';
       const label = list.length > 1 ? 'Bagian ' + (idx + 1) + ' (' + part.fileName + ')' : part.fileName;
-      const downloadTarget = part.downloadUrl || part.viewUrl || '#';
-      let autoSuccess = false;
-      try {
-        autoSuccess = triggerAutoDownload(downloadTarget);
-      } catch (e) {
-        autoSuccess = false;
-      }
-      if (autoSuccess) {
-        itemEl.innerHTML = '<span class="result-link-title"><i class="ph ph-video"></i> ' + label + '</span>' +
-          '<span class="result-status-tag"><i class="ph ph-check-circle"></i> Terunduh</span>';
-      } else {
-        itemEl.innerHTML = '<span class="result-link-title"><i class="ph ph-video"></i> ' + label + '</span>' +
-          '<a href="' + downloadTarget + '" download="' + (part.fileName || 'status_hd.mp4') + '" target="_blank" rel="noopener noreferrer" class="result-btn-download"><i class="ph ph-download-simple"></i> Unduh File</a>';
-        const btn = itemEl.querySelector('.result-btn-download');
-        if (btn) {
-          btn.addEventListener('click', function() {
-            btn.innerHTML = '<i class="ph ph-check"></i> Mengunduh...';
-          });
-        }
-      }
+      const directUrl = getDirectDownloadUrl(part);
+      const fileName = part.fileName || 'status_hd.mp4';
+      itemEl.innerHTML = '<span class="result-link-title"><i class="ph-bold ph-film-slate"></i> ' + label + '</span>' +
+        '<button type="button" class="result-btn-download"><i class="ph-bold ph-download-simple"></i> Unduh File</button>';
       resultLinks.appendChild(itemEl);
+      const btn = itemEl.querySelector('.result-btn-download');
+      if (btn) {
+        btn.addEventListener('click', function() {
+          downloadBlobFile(directUrl, fileName, btn);
+        });
+      }
+      setTimeout(function() {
+        downloadBlobFile(directUrl, fileName, btn);
+      }, idx * 1000);
     });
   }
   function handleJobError(msg) {
