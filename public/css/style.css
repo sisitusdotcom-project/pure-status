@@ -18,8 +18,6 @@ body{font-family:var(--font);background-color:var(--bg-base);color:var(--text-ma
 .form-container{display:flex;flex-direction:column;gap:14px;}
 .form-group{display:flex;flex-direction:column;gap:6px;}
 .form-label{font-size:13.5px;font-weight:600;color:var(--text-main);}
-.form-textarea{width:100%;padding:10px 12px;background-color:var(--bg-base);border:1px solid var(--border-color);border-radius:8px;color:var(--text-main);font-size:13px;font-family:inherit;resize:vertical;outline:none;}
-.form-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(56,189,248,0.2);}
 .drop-zone{border:2px dashed var(--border-color);background-color:rgba(15,23,42,0.6);border-radius:8px;padding:24px 14px;text-align:center;cursor:pointer;transition:border-color 0.2s,background-color 0.2s;}
 .drop-zone:hover,.drop-zone.drag-active{border-color:var(--accent);background-color:rgba(56,189,248,0.05);}
 .drop-zone-icon{font-size:30px;margin-bottom:6px;}
@@ -82,12 +80,6 @@ body{font-family:var(--font);background-color:var(--bg-base);color:var(--text-ma
 .result-btn-download:hover{transform:translateY(-1px);filter:brightness(1.08);}
 .result-btn-drive{color:var(--accent);text-decoration:none;font-weight:600;font-size:12px;padding:9px 12px;background-color:rgba(56,189,248,0.1);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;}
 .result-btn-drive:hover{background-color:rgba(56,189,248,0.2);}
-.result-caption-card{background-color:var(--bg-base);border:1px solid var(--border-color);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;}
-.caption-header{display:flex;justify-content:space-between;align-items:center;}
-.caption-label{font-size:12px;font-weight:700;color:var(--text-main);}
-.btn-copy-caption{background-color:rgba(56,189,248,0.15);color:var(--accent);border:1px solid rgba(56,189,248,0.3);border-radius:4px;padding:4px 10px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all 0.15s;}
-.btn-copy-caption:hover{background-color:rgba(56,189,248,0.25);color:#fff;}
-.caption-content{font-size:12px;color:var(--text-muted);line-height:1.45;word-break:break-word;background:rgba(0,0,0,0.2);padding:8px 10px;border-radius:6px;}
 .guide-card{background-color:var(--bg-base);border:1px solid var(--border-color);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px;}
 .guide-title{font-size:12.5px;font-weight:700;color:var(--accent);}
 .guide-steps{display:flex;flex-direction:column;gap:6px;font-size:11.5px;color:var(--text-muted);padding-left:16px;}

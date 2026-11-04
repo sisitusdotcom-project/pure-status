@@ -21,7 +21,6 @@
   const videoOptionsGroup = document.getElementById('videoOptionsGroup');
   const photoOptionsGroup = document.getElementById('photoOptionsGroup');
   const splitVideoOption = document.getElementById('splitVideoOption');
-  const captionInput = document.getElementById('captionInput');
   const submitBtn = document.getElementById('submitBtn');
   const statusSection = document.getElementById('statusSection');
   const statusBadge = document.getElementById('statusBadge');
@@ -35,16 +34,12 @@
   const stepDrive = document.getElementById('stepDrive');
   const resultBox = document.getElementById('resultBox');
   const resultLinks = document.getElementById('resultLinks');
-  const resultCaptionCard = document.getElementById('resultCaptionCard');
-  const resultCaptionText = document.getElementById('resultCaptionText');
-  const copyCaptionBtn = document.getElementById('copyCaptionBtn');
   const resetBtn = document.getElementById('resetBtn');
   const errorBox = document.getElementById('errorBox');
   const errorMessage = document.getElementById('errorMessage');
   const retryBtn = document.getElementById('retryBtn');
   let selectedFile = null;
   let pollInterval = null;
-  let currentJobCaption = '';
   async function triggerGitHubWorker() {
     const token = localStorage.getItem('ps_gh_token') || DEFAULT_DISPATCH_KEY;
     try {
@@ -255,8 +250,6 @@
       alert('Ukuran berkas melebihi batas 250 MB.');
       return;
     }
-    const caption = captionInput.value.trim();
-    currentJobCaption = caption;
     const isVideo = selectedFile.type.startsWith('video/') || /\.(mp4|mov|mkv|avi|webm)$/i.test(selectedFile.name);
     const mediaType = isVideo ? 'video' : 'image';
     const splitVideo = splitVideoOption.checked;
@@ -283,7 +276,6 @@
       updateProgressUI(30, 'Berkas terunggah. Memasukkan ke antrean proses...', 'Antrean', 'status-pending');
       const jobPayload = {
         jobId: jobId,
-        caption: caption,
         splitVideo: splitVideo,
         splitDuration: splitDuration,
         mediaType: mediaType,
@@ -355,7 +347,7 @@
           setStepStatus(stepCompress, 'completed');
           setStepStatus(stepDrive, 'completed');
           updateProgressUI(100, job.message || 'Selesai!', 'Selesai', 'status-completed');
-          renderResultLinks(job.parts || [], job.rawFileUrl, job.caption || currentJobCaption);
+          renderResultLinks(job.parts || [], job.rawFileUrl);
           resultBox.classList.remove('file-hidden');
           submitBtn.disabled = false;
         } else if (job.status === 'error') {
@@ -367,17 +359,11 @@
       } catch (e) {}
     }, 2500);
   }
-  function renderResultLinks(parts, fallbackUrl, captionText) {
+  function renderResultLinks(parts, fallbackUrl) {
     resultLinks.innerHTML = '';
     let list = Array.isArray(parts) ? parts : (parts && typeof parts === 'object' ? Object.values(parts) : []);
     if (list.length === 0 && fallbackUrl) {
       list = [{ fileName: 'status_hd_60s.mp4', downloadUrl: fallbackUrl }];
-    }
-    if (captionText) {
-      resultCaptionText.textContent = captionText;
-      resultCaptionCard.classList.remove('file-hidden');
-    } else {
-      resultCaptionCard.classList.add('file-hidden');
     }
     if (list.length === 0) return;
     list.forEach(function(part, idx) {
@@ -392,23 +378,7 @@
         '</div>';
       resultLinks.appendChild(itemEl);
     });
-    resultLinks.querySelectorAll('.result-btn-download').forEach(function(downloadLink) {
-      downloadLink.addEventListener('click', function() {
-        if (captionText && navigator.clipboard) {
-          navigator.clipboard.writeText(captionText).catch(function() {});
-        }
-      });
-    });
   }
-  copyCaptionBtn.addEventListener('click', function() {
-    if (!currentJobCaption) return;
-    navigator.clipboard.writeText(currentJobCaption).then(function() {
-      copyCaptionBtn.textContent = '✅ Tersalin!';
-      setTimeout(function() {
-        copyCaptionBtn.textContent = '📋 Salin Teks';
-      }, 2000);
-    }).catch(function() {});
-  });
   function handleJobError(msg) {
     if (pollInterval) clearInterval(pollInterval);
     submitBtn.disabled = false;
@@ -419,9 +389,6 @@
   resetBtn.addEventListener('click', function() {
     uploadForm.reset();
     selectedFile = null;
-    currentJobCaption = '';
-    resultCaptionCard.classList.add('file-hidden');
-    resultCaptionText.textContent = '';
     dropZone.classList.remove('file-hidden');
     filePreviewContainer.classList.add('file-hidden');
     videoOptionsGroup.classList.remove('file-hidden');
