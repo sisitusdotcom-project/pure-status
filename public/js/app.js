@@ -28,6 +28,15 @@
   const progressBar = document.getElementById('progressBar');
   const statusMessage = document.getElementById('statusMessage');
   const progressText = document.getElementById('progressText');
+  const workerWakeupBanner = document.getElementById('workerWakeupBanner');
+  const btnTriggerWorkerNow = document.getElementById('btnTriggerWorkerNow');
+  const btnOpenWorkerSettings = document.getElementById('btnOpenWorkerSettings');
+  const workerModal = document.getElementById('workerModal');
+  const btnCloseModal = document.getElementById('btnCloseModal');
+  const githubTokenInput = document.getElementById('githubTokenInput');
+  const tokenStatusMsg = document.getElementById('tokenStatusMsg');
+  const btnSaveToken = document.getElementById('btnSaveToken');
+  const btnRemoveToken = document.getElementById('btnRemoveToken');
   const stepUpload = document.getElementById('stepUpload');
   const stepCompress = document.getElementById('stepCompress');
   const stepDrive = document.getElementById('stepDrive');
@@ -39,6 +48,129 @@
   const retryBtn = document.getElementById('retryBtn');
   let selectedFile = null;
   let pollInterval = null;
+  function updateWorkerStatusBadge() {
+    const savedToken = localStorage.getItem('ps_gh_token');
+    if (savedToken) {
+      btnOpenWorkerSettings.textContent = '⚡ Worker: Otomatis Aktif';
+      btnOpenWorkerSettings.classList.add('is-active');
+      btnRemoveToken.classList.remove('file-hidden');
+    } else {
+      btnOpenWorkerSettings.textContent = '⚙️ Worker Otomatis';
+      btnOpenWorkerSettings.classList.remove('is-active');
+      btnRemoveToken.classList.add('file-hidden');
+    }
+  }
+  updateWorkerStatusBadge();
+  btnOpenWorkerSettings.addEventListener('click', function() {
+    const token = localStorage.getItem('ps_gh_token') || '';
+    githubTokenInput.value = token;
+    tokenStatusMsg.className = 'token-status-msg file-hidden';
+    tokenStatusMsg.textContent = '';
+    workerModal.classList.remove('file-hidden');
+  });
+  btnCloseModal.addEventListener('click', function() {
+    workerModal.classList.add('file-hidden');
+  });
+  workerModal.addEventListener('click', function(e) {
+    if (e.target === workerModal) workerModal.classList.add('file-hidden');
+  });
+  btnSaveToken.addEventListener('click', async function() {
+    const token = githubTokenInput.value.trim();
+    if (!token) {
+      tokenStatusMsg.className = 'token-status-msg token-error';
+      tokenStatusMsg.textContent = 'Silakan masukkan GitHub Token.';
+      tokenStatusMsg.classList.remove('file-hidden');
+      return;
+    }
+    btnSaveToken.disabled = true;
+    btnSaveToken.textContent = 'Memverifikasi...';
+    try {
+      const testRes = await fetch('https://api.github.com/repos/sisitusdotcom-project/pure-status/actions/workflows/worker.yml', {
+        headers: {
+          'Accept': 'application/vnd.github+json',
+          'Authorization': 'Bearer ' + token,
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      });
+      if (testRes.status === 200) {
+        localStorage.setItem('ps_gh_token', token);
+        tokenStatusMsg.className = 'token-status-msg token-success';
+        tokenStatusMsg.textContent = 'Berhasil terhubung! Worker akan otomatis dibangunkan setiap kali unggah.';
+        tokenStatusMsg.classList.remove('file-hidden');
+        updateWorkerStatusBadge();
+        setTimeout(function() {
+          workerModal.classList.add('file-hidden');
+        }, 1200);
+      } else {
+        const errData = await testRes.json().catch(function() { return {}; });
+        tokenStatusMsg.className = 'token-status-msg token-error';
+        tokenStatusMsg.textContent = 'Gagal verifikasi token: ' + (errData.message || ('Status ' + testRes.status));
+        tokenStatusMsg.classList.remove('file-hidden');
+      }
+    } catch (err) {
+      tokenStatusMsg.className = 'token-status-msg token-error';
+      tokenStatusMsg.textContent = 'Kendala koneksi: ' + (err.message || String(err));
+      tokenStatusMsg.classList.remove('file-hidden');
+    } finally {
+      btnSaveToken.disabled = false;
+      btnSaveToken.textContent = 'Simpan & Aktifkan';
+    }
+  });
+  btnRemoveToken.addEventListener('click', function() {
+    localStorage.removeItem('ps_gh_token');
+    githubTokenInput.value = '';
+    updateWorkerStatusBadge();
+    tokenStatusMsg.className = 'token-status-msg token-success';
+    tokenStatusMsg.textContent = 'Token berhasil dihapus dari browser.';
+    tokenStatusMsg.classList.remove('file-hidden');
+  });
+  async function triggerGitHubWorker() {
+    const token = localStorage.getItem('ps_gh_token');
+    if (!token) {
+      return { success: false, reason: 'no_token' };
+    }
+    try {
+      const res = await fetch('https://api.github.com/repos/sisitusdotcom-project/pure-status/actions/workflows/worker.yml/dispatches', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/vnd.github+json',
+          'Authorization': 'Bearer ' + token.trim(),
+          'X-GitHub-Api-Version': '2022-11-28'
+        },
+        body: JSON.stringify({ ref: 'main' })
+      });
+      if (res.status === 204) {
+        return { success: true };
+      }
+      const err = await res.json().catch(function() { return {}; });
+      return { success: false, reason: err.message || ('Status ' + res.status) };
+    } catch (e) {
+      return { success: false, reason: e.message || String(e) };
+    }
+  }
+  btnTriggerWorkerNow.addEventListener('click', async function() {
+    const savedToken = localStorage.getItem('ps_gh_token');
+    if (!savedToken) {
+      workerModal.classList.remove('file-hidden');
+      return;
+    }
+    btnTriggerWorkerNow.disabled = true;
+    btnTriggerWorkerNow.textContent = 'Membangunkan...';
+    const result = await triggerGitHubWorker();
+    if (result.success) {
+      btnTriggerWorkerNow.textContent = 'Worker Aktif!';
+      updateProgressUI(null, 'Worker cloud sedang mulai berjalan...', 'Diproses', 'status-processing');
+      setTimeout(function() {
+        workerWakeupBanner.classList.add('file-hidden');
+        btnTriggerWorkerNow.disabled = false;
+        btnTriggerWorkerNow.textContent = '⚡ Bangunkan Worker Sekarang';
+      }, 2500);
+    } else {
+      alert('Gagal membangunkan worker: ' + (result.reason || 'Terjadi kesalahan') + '. Periksa kembali token pada menu ⚙️ Worker Otomatis.');
+      btnTriggerWorkerNow.disabled = false;
+      btnTriggerWorkerNow.textContent = '⚡ Bangunkan Worker Sekarang';
+    }
+  });
   dropZone.addEventListener('click', function() {
     fileInput.click();
   });
@@ -109,8 +241,10 @@
     });
   }
   function updateProgressUI(percent, message, badgeText, badgeClass) {
-    progressBar.style.width = percent + '%';
-    progressText.textContent = percent + '%';
+    if (percent !== null && percent !== undefined) {
+      progressBar.style.width = percent + '%';
+      progressText.textContent = percent + '%';
+    }
     if (message) statusMessage.textContent = message;
     if (badgeText) {
       statusBadge.textContent = badgeText;
@@ -224,10 +358,11 @@
     statusSection.classList.remove('file-hidden');
     resultBox.classList.add('file-hidden');
     errorBox.classList.add('file-hidden');
+    workerWakeupBanner.classList.add('file-hidden');
     setStepStatus(stepUpload, 'active');
     setStepStatus(stepCompress, '');
     setStepStatus(stepDrive, '');
-    updateProgressUI(5, 'Menghubungkan ke penyimpanan cloud...', 'Mengunggah', 'status-processing');
+    updateProgressUI(5, 'Menghubungkan ke cloud...', 'Mengunggah', 'status-processing');
     try {
       const driveResult = await uploadFileToDrive(selectedFile);
       setStepStatus(stepUpload, 'completed');
@@ -262,6 +397,19 @@
           body: JSON.stringify(jobPayload)
         })
       ]);
+      const savedToken = localStorage.getItem('ps_gh_token');
+      if (savedToken) {
+        triggerGitHubWorker().then(function(res) {
+          if (res.success) {
+            updateProgressUI(30, 'Worker Cloud berhasil dibangunkan otomatis! Memproses media...', 'Diproses', 'status-processing');
+            workerWakeupBanner.classList.add('file-hidden');
+          } else {
+            workerWakeupBanner.classList.remove('file-hidden');
+          }
+        });
+      } else {
+        workerWakeupBanner.classList.remove('file-hidden');
+      }
       startPollingJob(jobId);
     } catch (err) {
       handleJobError(err.message || 'Terjadi kesalahan sistem.');
@@ -275,16 +423,19 @@
         const job = await response.json();
         if (!job) return;
         if (job.status === 'processing' || job.status === 'compressing') {
+          workerWakeupBanner.classList.add('file-hidden');
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'active');
           updateProgressUI(job.progress || 50, job.message || 'Mengompresi media HD...', 'Diproses', 'status-processing');
         } else if (job.status === 'uploading') {
+          workerWakeupBanner.classList.add('file-hidden');
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'completed');
           setStepStatus(stepDrive, 'active');
           updateProgressUI(job.progress || 75, job.message || 'Menyiapkan berkas status...', 'Menyiapkan', 'status-processing');
         } else if (job.status === 'completed') {
           clearInterval(pollInterval);
+          workerWakeupBanner.classList.add('file-hidden');
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'completed');
           setStepStatus(stepDrive, 'completed');
@@ -294,6 +445,7 @@
           submitBtn.disabled = false;
         } else if (job.status === 'error') {
           clearInterval(pollInterval);
+          workerWakeupBanner.classList.add('file-hidden');
           handleJobError(job.error || job.message || 'Proses gagal.');
         }
       } catch (e) {}
@@ -365,6 +517,7 @@
     statusSection.classList.add('file-hidden');
     resultBox.classList.add('file-hidden');
     errorBox.classList.add('file-hidden');
+    workerWakeupBanner.classList.add('file-hidden');
   });
   retryBtn.addEventListener('click', function() {
     errorBox.classList.add('file-hidden');

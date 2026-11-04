@@ -17,6 +17,7 @@
 <p class="app-subtitle">Kompresi Pintar & Video Splitter Khusus Status WhatsApp 60 Detik HD</p>
 </div>
 </div>
+<button type="button" id="btnOpenWorkerSettings" class="btn-worker-settings">⚙️ Worker Otomatis</button>
 </div>
 </header>
 <main class="app-main">
@@ -94,10 +95,14 @@
 <span id="progressText" class="progress-percent">0%</span>
 </div>
 </div>
+<div id="workerWakeupBanner" class="worker-wakeup-banner file-hidden">
+<span>⚡ Antrean sedang menunggu pemrosesan worker.</span>
+<button type="button" id="btnTriggerWorkerNow" class="btn-trigger-worker">⚡ Bangunkan Worker Sekarang</button>
+</div>
 <div class="steps-list">
 <div class="step-item" id="stepUpload">
 <span class="step-dot"></span>
-<span class="step-label">Unggah Berkas ke Penyimpanan Cloud (Streaming Resumable)</span>
+<span class="step-label">Unggah Berkas ke Penyimpanan Cloud (Multi-Chunk Slicing)</span>
 </div>
 <div class="step-item" id="stepCompress">
 <span class="step-dot"></span>
@@ -131,6 +136,27 @@
 </section>
 </div>
 </main>
+<div id="workerModal" class="modal-overlay file-hidden">
+<div class="modal-dialog">
+<div class="modal-header">
+<h3 class="modal-title">Pengaturan Worker Otomatis</h3>
+<button type="button" id="btnCloseModal" class="modal-close">&times;</button>
+</div>
+<div class="modal-body">
+<p class="modal-desc">Simpan GitHub Token sekali saja di browser ini agar antrean kompresi langsung diproses otomatis tanpa perlu bolak-balik menjalankan Action di GitHub.</p>
+<div class="form-group">
+<label for="githubTokenInput" class="form-label">GitHub Personal Access Token (PAT)</label>
+<input type="password" id="githubTokenInput" class="form-input" placeholder="ghp_... atau github_pat_...">
+<div class="modal-help-text">Token hanya butuh izin <strong>Actions (Read and write)</strong> atau <strong>repo</strong>. Disimpan privat di browser Anda (localStorage). <a href="https://github.com/settings/tokens/new?scopes=repo&description=PureStatus+Worker" target="_blank" rel="noopener noreferrer" class="modal-help-link">Buat Token di GitHub &rarr;</a></div>
+</div>
+<div id="tokenStatusMsg" class="token-status-msg file-hidden"></div>
+<div class="modal-actions">
+<button type="button" id="btnSaveToken" class="btn-primary">Simpan &amp; Aktifkan</button>
+<button type="button" id="btnRemoveToken" class="btn-secondary file-hidden">Hapus</button>
+</div>
+</div>
+</div>
+</div>
 <footer class="app-footer">
 <div class="footer-inner">
 <p>&copy; WhatsApp Pure Status Engine. ByeBye Blur Status Web Edition.</p>
