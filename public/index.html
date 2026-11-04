@@ -15,9 +15,9 @@
 <div class="logo-text">
 <div class="title-row">
 <h1 class="app-title">WhatsApp Pure Status</h1>
-<span class="worker-status-badge">⚡ Auto Worker</span>
+<span class="worker-status-badge">⚡ Otomatis</span>
 </div>
-<p class="app-subtitle">Kompresi Presisi Video &amp; Foto 60 Detik Anti-Pecah</p>
+<p class="app-subtitle">Kompres Video &amp; Foto Anti-Pecah</p>
 </div>
 </div>
 </div>
@@ -27,11 +27,11 @@
 <section class="card upload-card">
 <form id="uploadForm" class="form-container">
 <div class="form-group">
-<label class="form-label">Pilih Video atau Foto</label>
+<label class="form-label">Pilih File</label>
 <div id="dropZone" class="drop-zone">
 <div class="drop-zone-icon">📁</div>
-<div class="drop-zone-text">Klik atau seret video / foto ke sini</div>
-<div class="drop-zone-sub">Mendukung MP4, MOV, MKV, JPG, PNG, WEBP (Hingga 200 MB)</div>
+<div class="drop-zone-text">Pilih atau seret file ke sini</div>
+<div class="drop-zone-sub">Video &amp; Foto (Maksimal 200 MB)</div>
 <input type="file" id="fileInput" class="file-input-hidden" accept="video/*,image/*" required>
 </div>
 <div id="filePreviewContainer" class="file-preview-card file-hidden">
@@ -43,41 +43,41 @@
 </div>
 </div>
 <div id="videoOptionsGroup" class="form-group options-group">
-<span class="options-title">Pengaturan Video Status</span>
+<span class="options-title">Durasi Status</span>
 <label class="checkbox-label">
 <input type="checkbox" id="splitVideoOption" checked>
-<span>Pecah otomatis durasi video untuk Status WhatsApp</span>
+<span>Potong video otomatis</span>
 </label>
 <div class="split-choice-wrap">
 <label class="radio-mini">
 <input type="radio" name="splitDuration" value="60" checked>
-<span>60 Detik (Standar Baru HD)<span class="badge-recommend">Terbaru</span></span>
+<span>60 Detik <span class="badge-recommend">HD Baru</span></span>
 </label>
 <label class="radio-mini">
 <input type="radio" name="splitDuration" value="30">
-<span>30 Detik (Format Lama)</span>
+<span>30 Detik</span>
 </label>
 </div>
 </div>
 <div id="photoOptionsGroup" class="form-group options-group file-hidden">
-<span class="options-title">Pengaturan Optimasi Foto</span>
+<span class="options-title">Format Foto</span>
 <label class="checkbox-label">
 <input type="radio" name="photoMode" id="photoModeVideo" value="video" checked>
-<span>Ubah Foto Jadi Video Status HD (Rekomendasi PureStatus)<span class="badge-recommend">Anti Pecah</span></span>
+<span>Format Video Status <span class="badge-recommend">Anti Pecah</span></span>
 </label>
 <label class="checkbox-label">
 <input type="radio" name="photoMode" id="photoModeImage" value="image">
-<span>Format Foto Asli JPEG HD (Chroma 4:2:0 Maksimal)</span>
+<span>Format Foto JPEG HD</span>
 </label>
 </div>
 <button type="submit" id="submitBtn" class="btn-primary">
-<span class="btn-text">🚀 Kompres Presisi Pure Status HD</span>
+<span class="btn-text">🚀 Kompres File</span>
 </button>
 </form>
 </section>
 <section id="statusSection" class="card status-card file-hidden">
 <div class="status-header">
-<h2 class="status-title">Proses Pengolahan Media</h2>
+<h2 class="status-title">Proses Kompresi</h2>
 <span id="statusBadge" class="status-badge status-pending">Menunggu Antrean</span>
 </div>
 <div class="progress-container">
@@ -85,42 +85,42 @@
 <div id="progressBar" class="progress-bar-fill"></div>
 </div>
 <div class="progress-meta">
-<span id="statusMessage" class="status-message">Menyiapkan berkas...</span>
+<span id="statusMessage" class="status-message">Memulai...</span>
 <span id="progressText" class="progress-percent">0%</span>
 </div>
 </div>
 <div id="workerWakeupBanner" class="worker-wakeup-banner file-hidden">
-<span>⚡ Antrean menunggu server worker.</span>
+<span>⚡ Menunggu antrean server...</span>
 <button type="button" id="btnTriggerWorkerNow" class="btn-trigger-worker">⚡ Bangunkan Sekarang</button>
 </div>
 <div class="steps-list">
 <div class="step-item" id="stepUpload">
 <span class="step-dot"></span>
-<span class="step-label">Mengupload berkas ke server</span>
+<span class="step-label">Upload file ke server</span>
 </div>
 <div class="step-item" id="stepCompress">
 <span class="step-dot"></span>
-<span class="step-label">Mengompres file (Pure Status HD 720p 60s)</span>
+<span class="step-label">Kompres file HD</span>
 </div>
 <div class="step-item" id="stepDrive">
 <span class="step-dot"></span>
-<span class="step-label">Penyelesaian berkas siap status</span>
+<span class="step-label">Menyimpan file hasil</span>
 </div>
 </div>
 <div id="resultBox" class="result-box file-hidden">
-<h3 class="result-title">Selesai! Berkas HD Siap Dipasang</h3>
-<p class="result-desc">Media telah diproses sesuai standar Pure Status HD (720p 30fps CFR):</p>
+<h3 class="result-title">Selesai! File Siap Digunakan</h3>
+<p class="result-desc">File berhasil dioptimasi anti-pecah:</p>
 <div id="resultLinks" class="result-links"></div>
 <div class="guide-card">
-<span class="guide-title">💡 Rahasia Status HD 100% Anti-Pecah (Trik Teruskan):</span>
+<span class="guide-title">💡 Trik Pasang Status Anti-Pecah:</span>
 <ol class="guide-steps">
-<li>Klik tombol <strong>⬇️ Unduh Video HD</strong> di atas untuk menyimpan berkas ke galeri HP.</li>
-<li>Buka WhatsApp &gt; Kirim video ke ruang chat Anda sendiri (fitur <em>Kirim Pesan ke Diri Sendiri / You</em>) atau teman.</li>
-<li>Di dalam chat tersebut, tekan tombol <strong>Panah Teruskan (➡️ Forward)</strong> lalu centang <strong>Status Saya (My status)</strong>.</li>
-<li><strong>Hasilnya:</strong> WhatsApp meloloskan video sesuai standar Pure Status tanpa kompresi sepihak!</li>
+<li>Unduh file di atas ke galeri HP.</li>
+<li>Buka WhatsApp &gt; Kirim ke chat sendiri (<em>You</em>) atau teman.</li>
+<li>Tekan tombol <strong>Teruskan (➡️)</strong> pada video &gt; pilih <strong>Status Saya</strong>.</li>
+<li><strong>Hasil:</strong> Status tayang jernih tanpa kompresi ulang!</li>
 </ol>
 </div>
-<button type="button" id="resetBtn" class="btn-secondary">Proses Media Lain</button>
+<button type="button" id="resetBtn" class="btn-secondary">Kompres File Lain</button>
 </div>
 <div id="errorBox" class="error-box file-hidden">
 <h3 class="error-title">Terjadi Kendala</h3>

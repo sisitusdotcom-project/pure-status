@@ -379,7 +379,7 @@
       const downloadTarget = part.downloadUrl || part.viewUrl || '#';
       itemEl.innerHTML = '<span class="result-link-title">🎬 ' + label + '</span>' +
         '<div class="result-link-actions">' +
-        '<a href="' + downloadTarget + '" download="' + part.fileName + '" target="_blank" rel="noopener noreferrer" class="result-btn-download">⬇️ Unduh Video HD</a>' +
+        '<a href="' + downloadTarget + '" download="' + part.fileName + '" target="_blank" rel="noopener noreferrer" class="result-btn-download">⬇️ Unduh File</a>' +
         (part.viewUrl ? '<a href="' + part.viewUrl + '" target="_blank" rel="noopener noreferrer" class="result-btn-drive">Server</a>' : '') +
         '</div>';
       resultLinks.appendChild(itemEl);
