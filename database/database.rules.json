@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "queue": {
+      ".read": true,
+      ".write": true,
+      "$jobId": {
+        ".validate": "newData.hasChildren(['phoneNumber', 'mediaType', 'rawFileId', 'status'])"
+      }
+    },
+    "jobs": {
+      ".read": true,
+      ".write": true,
+      "$jobId": {
+        ".indexOn": ["status", "createdAt", "phoneNumber"]
+      }
+    },
+    "settings": {
+      ".read": true,
+      ".write": false
+    }
+  }
+}

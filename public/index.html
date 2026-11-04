@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhatsApp Pure Status - Kompresi Video & Gambar Anti Pecah</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-layout">
+<header class="app-header">
+<div class="header-inner">
+<div class="logo-group">
+<div class="logo-icon">HD</div>
+<div>
+<h1 class="app-title">WhatsApp Pure Status</h1>
+<p class="app-subtitle">Kompresi Presisi Video & Foto Khusus Status WhatsApp Tanpa Pecah</p>
+</div>
+</div>
+</div>
+</header>
+<main class="app-main">
+<div class="main-grid">
+<section class="card upload-card">
+<form id="uploadForm" class="form-container">
+<div class="form-group">
+<label for="phoneNumber" class="form-label">Nomor WhatsApp Tujuan</label>
+<div class="input-phone-wrap">
+<span class="phone-prefix">+62</span>
+<input type="tel" id="phoneNumber" class="form-input" placeholder="81234567890" required autocomplete="tel">
+</div>
+<span class="form-hint">Media hasil kompresi akan langsung dikirimkan ke nomor ini.</span>
+</div>
+<div class="form-group">
+<label class="form-label">Pilih Video atau Gambar</label>
+<div id="dropZone" class="drop-zone">
+<div class="drop-zone-icon">📁</div>
+<div class="drop-zone-text">Klik atau seret file video / foto ke sini</div>
+<div class="drop-zone-sub">Mendukung MP4, MOV, MKV, JPG, PNG, WEBP</div>
+<input type="file" id="fileInput" class="file-input-hidden" accept="video/*,image/*" required>
+</div>
+<div id="filePreviewContainer" class="file-preview-card file-hidden">
+<div class="preview-info">
+<span id="previewFileName" class="preview-name"></span>
+<span id="previewFileSize" class="preview-size"></span>
+</div>
+<button type="button" id="removeFileBtn" class="btn-remove-file">Ganti File</button>
+</div>
+</div>
+<div class="form-group">
+<label for="captionInput" class="form-label">Teks Caption (Opsional)</label>
+<textarea id="captionInput" class="form-textarea" rows="3" placeholder="Tulis caption sebelum media diproses..."></textarea>
+</div>
+<div class="form-group options-group">
+<label class="checkbox-label">
+<input type="checkbox" id="splitVideoOption" checked>
+<span>Pecah otomatis video per 30 detik untuk Status WhatsApp</span>
+</label>
+<label class="checkbox-label">
+<input type="checkbox" id="burnCaptionOption">
+<span>Tampilkan teks caption di dalam video / gambar (Overlay)</span>
+</label>
+</div>
+<button type="submit" id="submitBtn" class="btn-primary">
+<span class="btn-text">Kompres & Kirim ke WhatsApp</span>
+</button>
+</form>
+</section>
+<section id="statusSection" class="card status-card file-hidden">
+<div class="status-header">
+<h2 class="status-title">Proses Pengolahan Media</h2>
+<span id="statusBadge" class="status-badge status-pending">Menunggu Antrean</span>
+</div>
+<div class="progress-container">
+<div class="progress-bar-track">
+<div id="progressBar" class="progress-bar-fill"></div>
+</div>
+<div class="progress-meta">
+<span id="statusMessage" class="status-message">Menyiapkan berkas...</span>
+<span id="progressText" class="progress-percent">0%</span>
+</div>
+</div>
+<div class="steps-list">
+<div class="step-item" id="stepUpload">
+<span class="step-dot"></span>
+<span class="step-label">Unggah Berkas ke Google Drive</span>
+</div>
+<div class="step-item" id="stepCompress">
+<span class="step-dot"></span>
+<span class="step-label">Kompresi Algoritma Pure Status (FFmpeg / Image)</span>
+</div>
+<div class="step-item" id="stepDrive">
+<span class="step-dot"></span>
+<span class="step-label">Simpan Output ke Google Drive</span>
+</div>
+<div class="step-item" id="stepSend">
+<span class="step-dot"></span>
+<span class="step-label">Kirim Langsung ke Nomor WhatsApp</span>
+</div>
+</div>
+<div id="resultBox" class="result-box file-hidden">
+<h3 class="result-title">Selesai! Media Telah Dikirim</h3>
+<p class="result-desc">File berkualitas tinggi telah dikirim ke nomor WhatsApp Anda. Anda juga dapat melihat atau mengunduh hasilnya langsung:</p>
+<div id="resultLinks" class="result-links"></div>
+<button type="button" id="resetBtn" class="btn-secondary">Proses Media Lain</button>
+</div>
+<div id="errorBox" class="error-box file-hidden">
+<h3 class="error-title">Terjadi Kendala</h3>
+<p id="errorMessage" class="error-desc"></p>
+<button type="button" id="retryBtn" class="btn-secondary">Coba Lagi</button>
+</div>
+</section>
+</div>
+</main>
+<footer class="app-footer">
+<div class="footer-inner">
+<p>&copy; WhatsApp Pure Status Engine. Kolaborasi Firebase RTDB & Google Drive.</p>
+</div>
+</footer>
+</div>
+<script src="js/app.js"></script>
+</body>
+</html>

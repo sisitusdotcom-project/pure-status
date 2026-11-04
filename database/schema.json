@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WhatsAppPureStatusRTDBSchema",
+  "type": "object",
+  "properties": {
+    "queue": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "jobId": { "type": "string" },
+          "phoneNumber": { "type": "string" },
+          "caption": { "type": "string" },
+          "splitVideo": { "type": "boolean" },
+          "burnCaption": { "type": "boolean" },
+          "mediaType": { "type": "string", "enum": ["video", "image"] },
+          "rawFileId": { "type": "string" },
+          "rawFileName": { "type": "string" },
+          "rawFileUrl": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "processing"] },
+          "createdAt": { "type": "number" }
+        },
+        "required": ["jobId", "phoneNumber", "mediaType", "rawFileId", "status", "createdAt"]
+      }
+    },
+    "jobs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "jobId": { "type": "string" },
+          "phoneNumber": { "type": "string" },
+          "caption": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "processing", "compressing", "uploading", "sending", "completed", "error"] },
+          "progress": { "type": "number", "minimum": 0, "maximum": 100 },
+          "mediaType": { "type": "string" },
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "partIndex": { "type": "number" },
+                "fileId": { "type": "string" },
+                "downloadUrl": { "type": "string" },
+                "fileName": { "type": "string" }
+              }
+            }
+          },
+          "error": { "type": "string" },
+          "createdAt": { "type": "number" },
+          "updatedAt": { "type": "number" }
+        }
+      }
+    }
+  }
+}
