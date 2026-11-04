@@ -76,14 +76,10 @@ async function processJob(jobId, jobData) {
     if (jobData.mediaType === 'video') {
       processedFiles = await compressVideo(rawFilePath, outputDir, {
         splitVideo: jobData.splitVideo !== false,
-        splitDuration: jobData.splitDuration || 60,
-        caption: jobData.caption || '',
-        burnCaption: !!jobData.burnCaption
+        splitDuration: jobData.splitDuration || 60
       });
     } else {
       processedFiles = await compressImage(rawFilePath, outputDir, {
-        caption: jobData.caption || '',
-        burnCaption: !!jobData.burnCaption,
         asVideo: jobData.photoMode !== 'image'
       });
     }

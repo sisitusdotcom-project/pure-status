@@ -21,7 +21,6 @@
   const videoOptionsGroup = document.getElementById('videoOptionsGroup');
   const photoOptionsGroup = document.getElementById('photoOptionsGroup');
   const splitVideoOption = document.getElementById('splitVideoOption');
-  const burnCaptionOption = document.getElementById('burnCaptionOption');
   const captionInput = document.getElementById('captionInput');
   const submitBtn = document.getElementById('submitBtn');
   const statusSection = document.getElementById('statusSection');
@@ -42,6 +41,7 @@
   const retryBtn = document.getElementById('retryBtn');
   let selectedFile = null;
   let pollInterval = null;
+  let currentJobCaption = '';
   async function triggerGitHubWorker() {
     const token = localStorage.getItem('ps_gh_token') || DEFAULT_DISPATCH_KEY;
     try {
@@ -253,10 +253,10 @@
       return;
     }
     const caption = captionInput.value.trim();
+    currentJobCaption = caption;
     const isVideo = selectedFile.type.startsWith('video/') || /\.(mp4|mov|mkv|avi|webm)$/i.test(selectedFile.name);
     const mediaType = isVideo ? 'video' : 'image';
     const splitVideo = splitVideoOption.checked;
-    const burnCaption = burnCaptionOption.checked;
     let splitDuration = 60;
     const splitDurEl = document.querySelector('input[name="splitDuration"]:checked');
     if (splitDurEl) splitDuration = Number(splitDurEl.value) || 60;
@@ -283,7 +283,6 @@
         caption: caption,
         splitVideo: splitVideo,
         splitDuration: splitDuration,
-        burnCaption: burnCaption,
         mediaType: mediaType,
         photoMode: photoMode,
         rawFileId: driveResult.fileId,
@@ -348,7 +347,7 @@
           setStepStatus(stepCompress, 'completed');
           setStepStatus(stepDrive, 'completed');
           updateProgressUI(100, job.message || 'Selesai!', 'Selesai', 'status-completed');
-          renderResultLinks(job.parts || [], job.rawFileUrl);
+          renderResultLinks(job.parts || [], job.rawFileUrl, job.caption || currentJobCaption);
           resultBox.classList.remove('file-hidden');
           submitBtn.disabled = false;
         } else if (job.status === 'error') {
@@ -360,7 +359,7 @@
       } catch (e) {}
     }, 2500);
   }
-  function renderResultLinks(parts, fallbackUrl) {
+  function renderResultLinks(parts, fallbackUrl, captionText) {
     resultLinks.innerHTML = '';
     let list = Array.isArray(parts) ? parts : (parts && typeof parts === 'object' ? Object.values(parts) : []);
     if (list.length === 0 && fallbackUrl) {
@@ -374,11 +373,69 @@
       const downloadTarget = part.downloadUrl || part.viewUrl || '#';
       itemEl.innerHTML = '<span class="result-link-title">🎬 ' + label + '</span>' +
         '<div class="result-link-actions">' +
+        '<button type="button" class="result-btn-share" data-url="' + downloadTarget + '" data-name="' + part.fileName + '">🚀 Bagikan ke WhatsApp Status</button>' +
         '<a href="' + downloadTarget + '" download="' + part.fileName + '" target="_blank" rel="noopener noreferrer" class="result-btn-download">⬇️ Unduh Video HD</a>' +
-        '<a href="whatsapp://" class="result-btn-wa">📲 Buka WhatsApp</a>' +
         (part.viewUrl ? '<a href="' + part.viewUrl + '" target="_blank" rel="noopener noreferrer" class="result-btn-drive">Drive</a>' : '') +
         '</div>';
       resultLinks.appendChild(itemEl);
+    });
+    resultLinks.querySelectorAll('.result-btn-share').forEach(function(shareBtn) {
+      shareBtn.addEventListener('click', async function() {
+        const fileUrl = shareBtn.getAttribute('data-url');
+        const fileName = shareBtn.getAttribute('data-name') || 'status_pure.mp4';
+        const originalText = shareBtn.textContent;
+        shareBtn.disabled = true;
+        shareBtn.textContent = '⏳ Membuka WhatsApp...';
+        try {
+          const resp = await fetch(fileUrl);
+          const blob = await resp.blob();
+          const mime = blob.type || (fileName.endsWith('.jpg') ? 'image/jpeg' : 'video/mp4');
+          const file = new File([blob], fileName, { type: mime });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: 'WhatsApp Pure Status',
+              text: captionText || '',
+              files: [file]
+            });
+          } else {
+            if (captionText && navigator.clipboard) {
+              await navigator.clipboard.writeText(captionText);
+            }
+            const a = document.createElement('a');
+            a.href = fileUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            alert('Teks caption telah disalin ke clipboard! Video mulai diunduh. Silakan buka WhatsApp dan pilih video tersebut.');
+            window.location.href = 'whatsapp://';
+          }
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            if (captionText && navigator.clipboard) {
+              await navigator.clipboard.writeText(captionText);
+            }
+            const a = document.createElement('a');
+            a.href = fileUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            alert('Video diunduh dan caption disalin ke clipboard. Silakan buka WhatsApp dan pasang ke Status.');
+            window.location.href = 'whatsapp://';
+          }
+        } finally {
+          shareBtn.disabled = false;
+          shareBtn.textContent = originalText;
+        }
+      });
+    });
+    resultLinks.querySelectorAll('.result-btn-download').forEach(function(downloadLink) {
+      downloadLink.addEventListener('click', function() {
+        if (captionText && navigator.clipboard) {
+          navigator.clipboard.writeText(captionText).catch(function() {});
+        }
+      });
     });
   }
   function handleJobError(msg) {
@@ -391,6 +448,7 @@
   resetBtn.addEventListener('click', function() {
     uploadForm.reset();
     selectedFile = null;
+    currentJobCaption = '';
     dropZone.classList.remove('file-hidden');
     filePreviewContainer.classList.add('file-hidden');
     videoOptionsGroup.classList.remove('file-hidden');
