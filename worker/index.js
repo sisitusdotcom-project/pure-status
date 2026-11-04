@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const RTDBService = require('./rtdbService');
-const { downloadFileFromDrive, uploadToDrive } = require('./driveService');
+const { downloadFileFromDrive, appendChunkFromDrive, uploadToDrive } = require('./driveService');
 const { compressVideo, compressImage } = require('./compressor');
 const { sendToWhatsApp } = require('./whatsappService');
 const DATABASE_URL = process.env.FIREBASE_DATABASE_URL || 'https://pure-status-default-rtdb.firebaseio.com';
@@ -54,7 +54,20 @@ async function processJob(jobId, jobData) {
     });
     const rawExt = path.extname(jobData.rawFileName || '').toLowerCase() || (jobData.mediaType === 'video' ? '.mp4' : '.jpg');
     const rawFilePath = path.join(jobTmpDir, `raw_${jobId}${rawExt}`);
-    await downloadFileFromDrive(jobData.rawFileUrl, rawFilePath);
+    if (jobData.isChunked && Array.isArray(jobData.chunks) && jobData.chunks.length > 0) {
+      const sortedChunks = jobData.chunks.slice().sort((a, b) => (a.index || 0) - (b.index || 0));
+      const writer = fs.createWriteStream(rawFilePath);
+      for (let c = 0; c < sortedChunks.length; c++) {
+        await appendChunkFromDrive(sortedChunks[c].downloadUrl, writer);
+      }
+      await new Promise((resolve, reject) => {
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+        writer.end();
+      });
+    } else {
+      await downloadFileFromDrive(jobData.rawFileUrl, rawFilePath);
+    }
     await rtdb.updateJob(jobId, {
       status: 'compressing',
       progress: 35,
@@ -142,14 +155,19 @@ async function pollQueue() {
   if (isProcessing) return;
   isProcessing = true;
   try {
-    const queue = await rtdb.getQueue();
-    if (queue && typeof queue === 'object') {
-      const jobIds = Object.keys(queue);
-      if (jobIds.length > 0) {
-        const currentJobId = jobIds[0];
-        const currentJob = queue[currentJobId];
-        await processJob(currentJobId, currentJob);
+    let queue = await rtdb.getQueue();
+    let jobIds = queue && typeof queue === 'object' ? Object.keys(queue) : [];
+    if (jobIds.length === 0) {
+      const allJobs = await rtdb.getAllJobs();
+      if (allJobs && typeof allJobs === 'object') {
+        jobIds = Object.keys(allJobs).filter(id => allJobs[id] && allJobs[id].status === 'pending');
+        queue = allJobs;
       }
+    }
+    if (jobIds.length > 0) {
+      const currentJobId = jobIds[0];
+      const currentJob = queue[currentJobId];
+      await processJob(currentJobId, currentJob);
     }
   } catch (err) {
   } finally {
@@ -158,14 +176,19 @@ async function pollQueue() {
 }
 async function runSingleBatch() {
   try {
-    const queue = await rtdb.getQueue();
-    if (queue && typeof queue === 'object') {
-      const jobIds = Object.keys(queue);
-      for (let i = 0; i < jobIds.length; i++) {
-        const currentJobId = jobIds[i];
-        const currentJob = queue[currentJobId];
-        await processJob(currentJobId, currentJob);
+    let queue = await rtdb.getQueue();
+    let jobIds = queue && typeof queue === 'object' ? Object.keys(queue) : [];
+    if (jobIds.length === 0) {
+      const allJobs = await rtdb.getAllJobs();
+      if (allJobs && typeof allJobs === 'object') {
+        jobIds = Object.keys(allJobs).filter(id => allJobs[id] && allJobs[id].status === 'pending');
+        queue = allJobs;
       }
+    }
+    for (let i = 0; i < jobIds.length; i++) {
+      const currentJobId = jobIds[i];
+      const currentJob = queue[currentJobId];
+      await processJob(currentJobId, currentJob);
     }
   } catch (err) {}
   process.exit(0);

@@ -72,6 +72,15 @@ class RTDBService {
     const response = await axios.get(url);
     return response.data;
   }
+  async getAllJobs() {
+    if (this.useAdmin && this.db) {
+      const snap = await this.db.ref('jobs').once('value');
+      return snap.val() || {};
+    }
+    const url = this.buildUrl('/jobs');
+    const response = await axios.get(url);
+    return response.data || {};
+  }
   async createJob(jobId, jobData) {
     if (this.useAdmin && this.db) {
       await this.db.ref(`jobs/${jobId}`).set(jobData);

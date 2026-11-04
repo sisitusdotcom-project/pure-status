@@ -98,14 +98,14 @@
     dropZone.classList.add('file-hidden');
     filePreviewContainer.classList.remove('file-hidden');
   }
-  function fileToBase64(file) {
+  function fileToBase64(blob) {
     return new Promise(function(resolve, reject) {
       const reader = new FileReader();
       reader.onload = function() {
         resolve(reader.result);
       };
       reader.onerror = reject;
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(blob);
     });
   }
   function updateProgressUI(percent, message, badgeText, badgeClass) {
@@ -121,79 +121,82 @@
     stepEl.classList.remove('active', 'completed');
     if (status) stepEl.classList.add(status);
   }
-  async function uploadResumable(sessionUrl, file) {
-    const CHUNK_SIZE = 5 * 1024 * 1024;
-    let start = 0;
-    while (start < file.size) {
-      const end = Math.min(start + CHUNK_SIZE, file.size);
-      const chunk = file.slice(start, end);
-      const contentRange = 'bytes ' + start + '-' + (end - 1) + '/' + file.size;
-      const percent = Math.round((start / file.size) * 100);
-      updateProgressUI(Math.min(28, 5 + Math.round(percent * 0.23)), 'Mengunggah: ' + formatBytes(start) + ' / ' + formatBytes(file.size) + ' (' + percent + '%)', 'Mengunggah', 'status-processing');
-      const res = await fetch(sessionUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Range': contentRange
-        },
-        body: chunk
-      });
-      if (res.status === 200 || res.status === 201) {
-        const driveData = await res.json();
-        const fileId = driveData.id;
-        return {
-          status: 'success',
-          fileId: fileId,
-          fileName: file.name,
-          downloadUrl: 'https://drive.google.com/uc?export=download&id=' + fileId,
-          viewUrl: 'https://drive.google.com/file/d/' + fileId + '/view'
-        };
-      }
-      if (res.status === 308) {
-        start = end;
-      } else {
-        throw new Error('Gagal mengunggah potongan file (' + res.status + ')');
-      }
-    }
-  }
   async function uploadFileToDrive(file) {
-    if (file.size > 20 * 1024 * 1024) {
-      try {
-        const sessionPayload = {
-          action: 'createSession',
-          fileName: file.name,
-          mimeType: file.type || 'video/mp4',
-          fileSize: file.size,
-          folderKey: 'raw'
-        };
-        const sessionRes = await fetch(CONFIG.gasUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(sessionPayload)
-        });
-        const sessionData = await sessionRes.json();
-        if (sessionData && sessionData.status === 'success' && sessionData.sessionUrl) {
-          return await uploadResumable(sessionData.sessionUrl, file);
+    const CHUNK_SIZE = 8 * 1024 * 1024;
+    if (file.size <= CHUNK_SIZE) {
+      const base64Data = await fileToBase64(file);
+      const gasPayload = {
+        action: 'upload',
+        fileName: file.name,
+        mimeType: file.type || 'application/octet-stream',
+        fileData: base64Data,
+        folderKey: 'raw'
+      };
+      const driveUploadRes = await fetch(CONFIG.gasUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(gasPayload)
+      });
+      const driveResult = await driveUploadRes.json();
+      if (!driveResult || driveResult.status !== 'success') {
+        throw new Error(driveResult?.message || 'Gagal mengunggah berkas.');
+      }
+      return driveResult;
+    }
+    const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+    const chunks = [];
+    for (let i = 0; i < totalChunks; i++) {
+      const start = i * CHUNK_SIZE;
+      const end = Math.min(start + CHUNK_SIZE, file.size);
+      const chunkBlob = file.slice(start, end);
+      const chunkBase64 = await fileToBase64(chunkBlob);
+      const chunkName = 'chunk_' + i + '_' + file.name;
+      const percent = Math.round(((i + 1) / totalChunks) * 100);
+      updateProgressUI(Math.min(28, 5 + Math.round(percent * 0.23)), 'Mengunggah bagian ' + (i + 1) + ' dari ' + totalChunks + ' (' + percent + '%)', 'Mengunggah', 'status-processing');
+      let success = false;
+      let lastErr = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const res = await fetch(CONFIG.gasUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: 'upload',
+              fileName: chunkName,
+              mimeType: 'application/octet-stream',
+              fileData: chunkBase64,
+              folderKey: 'raw'
+            })
+          });
+          const resData = await res.json();
+          if (resData && resData.status === 'success') {
+            chunks.push({
+              index: i,
+              fileId: resData.fileId,
+              downloadUrl: resData.downloadUrl,
+              sizeBytes: resData.sizeBytes
+            });
+            success = true;
+            break;
+          }
+          lastErr = new Error(resData?.message || 'Respon tidak valid');
+        } catch (e) {
+          lastErr = e;
         }
-      } catch (err) {}
+      }
+      if (!success) {
+        throw new Error('Gagal mengunggah bagian ' + (i + 1) + ': ' + (lastErr?.message || 'Koneksi terputus'));
+      }
     }
-    const base64Data = await fileToBase64(file);
-    const gasPayload = {
-      action: 'upload',
+    return {
+      status: 'success',
+      isChunked: true,
+      totalChunks: totalChunks,
+      chunks: chunks,
       fileName: file.name,
-      mimeType: file.type || 'video/mp4',
-      fileData: base64Data,
-      folderKey: 'raw'
+      fileId: chunks[0].fileId,
+      downloadUrl: chunks[0].downloadUrl
     };
-    const driveUploadRes = await fetch(CONFIG.gasUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(gasPayload)
-    });
-    const driveResult = await driveUploadRes.json();
-    if (!driveResult || driveResult.status !== 'success') {
-      throw new Error(driveResult?.message || 'Gagal mengunggah berkas.');
-    }
-    return driveResult;
   }
   uploadForm.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -239,22 +242,26 @@
         mediaType: mediaType,
         photoMode: photoMode,
         rawFileId: driveResult.fileId,
-        rawFileName: driveResult.fileName,
+        rawFileName: selectedFile.name,
         rawFileUrl: driveResult.downloadUrl,
+        isChunked: !!driveResult.isChunked,
+        chunks: driveResult.chunks || null,
         status: 'pending',
         progress: 30,
         createdAt: Date.now()
       };
-      await fetch(getDbUrl('/jobs/' + jobId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(jobPayload)
-      });
-      await fetch(getDbUrl('/queue/' + jobId), {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(jobPayload)
-      });
+      await Promise.all([
+        fetch(getDbUrl('/jobs/' + jobId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(jobPayload)
+        }),
+        fetch(getDbUrl('/queue/' + jobId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(jobPayload)
+        })
+      ]);
       startPollingJob(jobId);
     } catch (err) {
       handleJobError(err.message || 'Terjadi kesalahan sistem.');

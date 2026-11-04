@@ -30,6 +30,27 @@ async function downloadFileFromDrive(fileUrl, outputPath) {
     writer.on('error', reject);
   });
 }
+async function appendChunkFromDrive(fileUrl, writeStream) {
+  const fileId = extractDriveFileId(fileUrl);
+  let targetUrl = fileUrl;
+  if (fileId) {
+    targetUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
+  }
+  const response = await axios({
+    method: 'GET',
+    url: targetUrl,
+    responseType: 'stream',
+    maxRedirects: 10,
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+    }
+  });
+  return new Promise((resolve, reject) => {
+    response.data.pipe(writeStream, { end: false });
+    response.data.on('end', resolve);
+    response.data.on('error', reject);
+  });
+}
 async function uploadToDrive(gasUrl, filePath, folderKey = 'compressed') {
   const fileBuffer = fs.readFileSync(filePath);
   const base64Data = fileBuffer.toString('base64');
@@ -60,5 +81,6 @@ async function uploadToDrive(gasUrl, filePath, folderKey = 'compressed') {
 module.exports = {
   extractDriveFileId,
   downloadFileFromDrive,
+  appendChunkFromDrive,
   uploadToDrive
 };
