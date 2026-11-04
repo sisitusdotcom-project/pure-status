@@ -42,7 +42,7 @@ function processVideoSegment(inputPath, outputPath, startTime, duration, caption
       .videoFilters(filterString)
       .videoCodec('libx264')
       .outputOptions([
-        '-preset medium',
+        '-preset fast',
         '-profile:v main',
         '-level 3.1',
         '-crf 23',
