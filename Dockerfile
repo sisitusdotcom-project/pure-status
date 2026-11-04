@@ -5,3 +5,4 @@ COPY package*.json ./
 RUN npm install --omit=dev
 COPY worker/ ./worker/
 CMD ["node", "worker/index.js"]
+
