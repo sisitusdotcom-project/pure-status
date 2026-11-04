@@ -194,7 +194,7 @@
       const chunkBase64 = await fileToBase64(chunkBlob);
       const chunkName = 'chunk_' + i + '_' + file.name;
       const percent = Math.round(((i + 1) / totalChunks) * 100);
-      updateProgressUI(Math.min(28, 5 + Math.round(percent * 0.23)), 'Mengunggah bagian ' + (i + 1) + ' dari ' + totalChunks + ' (' + percent + '%)', 'Mengunggah', 'status-processing');
+      updateProgressUI(Math.min(28, 5 + Math.round(percent * 0.23)), 'Mengupload berkas (' + percent + '%)', 'Mengupload', 'status-processing');
       let success = false;
       let lastErr = null;
       for (let attempt = 0; attempt < 3; attempt++) {
@@ -268,12 +268,12 @@
     setStepStatus(stepUpload, 'active');
     setStepStatus(stepCompress, '');
     setStepStatus(stepDrive, '');
-    updateProgressUI(5, 'Menghubungkan ke cloud...', 'Mengunggah', 'status-processing');
+    updateProgressUI(5, 'Mengupload berkas...', 'Mengupload', 'status-processing');
     try {
       const driveResult = await uploadFileToDrive(selectedFile);
       setStepStatus(stepUpload, 'completed');
       setStepStatus(stepCompress, 'active');
-      updateProgressUI(30, 'Berkas terunggah. Memasukkan ke antrean proses...', 'Antrean', 'status-pending');
+      updateProgressUI(30, 'Sedang menyiapkan...', 'Menyiapkan', 'status-pending');
       const jobPayload = {
         jobId: jobId,
         splitVideo: splitVideo,
@@ -303,7 +303,7 @@
       ]);
       triggerGitHubWorker().then(function(res) {
         if (res.success) {
-          updateProgressUI(30, 'Worker Cloud dipanggil. Menunggu mesin aktif...', 'Antrean', 'status-pending');
+          updateProgressUI(30, 'Sedang menyiapkan...', 'Menyiapkan', 'status-pending');
           workerWakeupBanner.classList.add('file-hidden');
         } else {
           workerWakeupBanner.classList.remove('file-hidden');
@@ -325,20 +325,26 @@
         if (job.status === 'pending') {
           pendingSeconds += 2.5;
           const pendingPercent = Math.min(38, 30 + Math.floor(pendingSeconds / 5));
-          updateProgressUI(pendingPercent, 'Menyiapkan mesin cloud worker (' + Math.round(pendingSeconds) + ' dtk)...', 'Booting Cloud', 'status-pending');
-        } else if (job.status === 'processing' || job.status === 'compressing') {
+          updateProgressUI(pendingPercent, 'Sedang menyiapkan (' + Math.round(pendingSeconds) + ' dtk)...', 'Menyiapkan', 'status-pending');
+        } else if (job.status === 'processing') {
           workerWakeupBanner.classList.add('file-hidden');
           errorBox.classList.add('file-hidden');
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'active');
-          updateProgressUI(job.progress || 50, job.message || 'Mengompresi media HD...', 'Diproses', 'status-processing');
+          updateProgressUI(job.progress || 40, job.message || 'Meninjau berkas...', 'Diproses', 'status-processing');
+        } else if (job.status === 'compressing') {
+          workerWakeupBanner.classList.add('file-hidden');
+          errorBox.classList.add('file-hidden');
+          setStepStatus(stepUpload, 'completed');
+          setStepStatus(stepCompress, 'active');
+          updateProgressUI(job.progress || 65, job.message || 'Mengompres file...', 'Diproses', 'status-processing');
         } else if (job.status === 'uploading') {
           workerWakeupBanner.classList.add('file-hidden');
           errorBox.classList.add('file-hidden');
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'completed');
           setStepStatus(stepDrive, 'active');
-          updateProgressUI(job.progress || 85, job.message || 'Menyiapkan berkas status...', 'Menyiapkan', 'status-processing');
+          updateProgressUI(job.progress || 85, job.message || 'Hampir selesai...', 'Hampir Selesai', 'status-processing');
         } else if (job.status === 'completed') {
           clearInterval(pollInterval);
           workerWakeupBanner.classList.add('file-hidden');
@@ -346,7 +352,7 @@
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'completed');
           setStepStatus(stepDrive, 'completed');
-          updateProgressUI(100, job.message || 'Selesai!', 'Selesai', 'status-completed');
+          updateProgressUI(100, job.message || 'Berkas selesai dan siap dibagikan ke WhatsApp.', 'Selesai', 'status-completed');
           renderResultLinks(job.parts || [], job.rawFileUrl);
           resultBox.classList.remove('file-hidden');
           submitBtn.disabled = false;
@@ -374,7 +380,7 @@
       itemEl.innerHTML = '<span class="result-link-title">🎬 ' + label + '</span>' +
         '<div class="result-link-actions">' +
         '<a href="' + downloadTarget + '" download="' + part.fileName + '" target="_blank" rel="noopener noreferrer" class="result-btn-download">⬇️ Unduh Video HD</a>' +
-        (part.viewUrl ? '<a href="' + part.viewUrl + '" target="_blank" rel="noopener noreferrer" class="result-btn-drive">Drive</a>' : '') +
+        (part.viewUrl ? '<a href="' + part.viewUrl + '" target="_blank" rel="noopener noreferrer" class="result-btn-drive">Server</a>' : '') +
         '</div>';
       resultLinks.appendChild(itemEl);
     });

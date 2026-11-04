@@ -45,7 +45,7 @@ async function processJob(jobId, jobData) {
     await rtdb.updateJob(jobId, {
       status: 'processing',
       progress: 40,
-      message: 'Worker cloud aktif. Mengunduh berkas mentah...'
+      message: 'Meninjau berkas...'
     });
     const rawExt = path.extname(jobData.rawFileName || '').toLowerCase() || (jobData.mediaType === 'video' ? '.mp4' : '.jpg');
     const rawFilePath = path.join(jobTmpDir, `raw_${jobId}${rawExt}`);
@@ -66,7 +66,7 @@ async function processJob(jobId, jobData) {
     await rtdb.updateJob(jobId, {
       status: 'compressing',
       progress: 65,
-      message: 'Menerapkan kompresi Pure Status HD (FFmpeg)...'
+      message: 'Mengompres file...'
     });
     const outputDir = path.join(jobTmpDir, 'output');
     if (!fs.existsSync(outputDir)) {
@@ -86,7 +86,7 @@ async function processJob(jobId, jobData) {
     await rtdb.updateJob(jobId, {
       status: 'uploading',
       progress: 85,
-      message: 'Menyimpan video HD ke Google Drive...'
+      message: 'Hampir selesai...'
     });
     const uploadedParts = [];
     if (GAS_URL && !GAS_URL.includes('MASUKKAN_ID')) {
@@ -117,7 +117,7 @@ async function processJob(jobId, jobData) {
       status: 'completed',
       progress: 100,
       parts: uploadedParts,
-      message: 'Berhasil dikompresi sesuai standar Pure Status.'
+      message: 'Berkas selesai dan siap dibagikan ke WhatsApp.'
     });
     await rtdb.removeQueueItem(jobId);
   } catch (error) {
