@@ -3,127 +3,190 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Unblur WhatsApp Status - Kompres Video &amp; Foto Anti-Pecah</title>
+<title>Unblur WhatsApp Status - Optimasi Video &amp; Foto Anti-Pecah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="app-layout">
 <header class="app-header">
 <div class="header-inner">
-<div class="logo-group">
-<div class="logo-icon">HD</div>
-<div class="logo-text">
-<h1 class="app-title">Unblur WhatsApp Status</h1>
-<p class="app-subtitle">Kompres Video &amp; Foto Anti-Pecah</p>
+<div class="brand">
+<div class="brand-icon"><i class="ph-bold ph-aperture"></i></div>
+<div class="brand-text">
+<div class="brand-title-row">
+<h1 class="brand-name">Unblur</h1>
+<span class="brand-tag">Status Engine</span>
+</div>
+<p class="brand-desc">Optimasi media Status WhatsApp tanpa kompresi buram</p>
 </div>
 </div>
 </div>
 </header>
 <main class="app-main">
-<div class="main-grid">
-<section class="card upload-card">
-<form id="uploadForm" class="form-container">
-<div class="form-group">
-<label class="form-label">Pilih File</label>
+<div class="main-column">
+<section class="workspace upload-card">
+<form id="uploadForm" class="form-flow">
+<div class="form-field">
+<div class="field-header">
+<label class="field-label">Pilih Berkas</label>
+<span class="field-hint">Maks. 200 MB</span>
+</div>
 <div id="dropZone" class="drop-zone">
-<div class="drop-zone-icon"><i class="ph ph-cloud-arrow-up"></i></div>
-<div class="drop-zone-text">Pilih atau seret file ke sini</div>
-<div class="drop-zone-sub">Video &amp; Foto (Maksimal 200 MB)</div>
+<div class="drop-zone-icon"><i class="ph-bold ph-tray-arrow-up"></i></div>
+<div class="drop-zone-content">
+<p class="drop-zone-title">Seret berkas video atau foto ke sini</p>
+<p class="drop-zone-subtitle">atau klik untuk menelusuri dari perangkat</p>
+</div>
+<div class="drop-zone-formats">
+<span class="format-chip">MP4</span>
+<span class="format-chip">MOV</span>
+<span class="format-chip">MKV</span>
+<span class="format-chip">JPG</span>
+<span class="format-chip">PNG</span>
+</div>
 <input type="file" id="fileInput" class="file-input-hidden" accept="video/*,image/*" required>
 </div>
-<div id="filePreviewContainer" class="file-preview-card file-hidden">
-<div class="preview-info">
+<div id="filePreviewContainer" class="file-preview-strip file-hidden">
+<div class="file-preview-left">
+<i class="ph-bold ph-film-slate preview-icon"></i>
+<div class="file-preview-meta">
 <span id="previewFileName" class="preview-name"></span>
 <span id="previewFileSize" class="preview-size"></span>
 </div>
-<button type="button" id="removeFileBtn" class="btn-remove-file">Ganti File</button>
+</div>
+<button type="button" id="removeFileBtn" class="btn-ghost-danger">Ganti Berkas</button>
 </div>
 </div>
-<div id="videoOptionsGroup" class="form-group options-group">
-<span class="options-title">Durasi Status</span>
-<label class="checkbox-label">
+<div id="videoOptionsGroup" class="form-field options-field">
+<div class="field-header">
+<span class="field-label">Pemotongan Durasi Slide</span>
+<label class="toggle-control">
 <input type="checkbox" id="splitVideoOption" checked>
-<span>Potong video otomatis</span>
+<span class="toggle-text">Potong Otomatis</span>
 </label>
-<div class="split-choice-wrap">
-<label class="radio-mini">
+</div>
+<div class="segmented-control">
+<label class="segment-tab">
 <input type="radio" name="splitDuration" value="60" checked>
-<span>60 Detik <span class="badge-recommend">HD Baru</span></span>
+<span class="segment-body">
+<span class="segment-title">60 Detik</span>
+<span class="segment-sub">Rekomendasi HD Baru</span>
+</span>
 </label>
-<label class="radio-mini">
+<label class="segment-tab">
 <input type="radio" name="splitDuration" value="30">
-<span>30 Detik</span>
+<span class="segment-body">
+<span class="segment-title">30 Detik</span>
+<span class="segment-sub">Format Lama</span>
+</span>
 </label>
 </div>
 </div>
-<div id="photoOptionsGroup" class="form-group options-group file-hidden">
-<span class="options-title">Format Foto</span>
-<label class="checkbox-label">
+<div id="photoOptionsGroup" class="form-field options-field file-hidden">
+<div class="field-header">
+<span class="field-label">Format Output Foto</span>
+</div>
+<div class="segmented-control">
+<label class="segment-tab">
 <input type="radio" name="photoMode" id="photoModeVideo" value="video" checked>
-<span>Format Video Status <span class="badge-recommend">Anti Pecah</span></span>
+<span class="segment-body">
+<span class="segment-title">Video Status</span>
+<span class="segment-sub">Trik Anti-Kompresi</span>
+</span>
 </label>
-<label class="checkbox-label">
+<label class="segment-tab">
 <input type="radio" name="photoMode" id="photoModeImage" value="image">
-<span>Format Foto JPEG HD</span>
+<span class="segment-body">
+<span class="segment-title">Foto JPEG HD</span>
+<span class="segment-sub">Kualitas 90% Chroma 4:2:0</span>
+</span>
 </label>
 </div>
-<button type="submit" id="submitBtn" class="btn-primary">
-<span class="btn-text"><i class="ph ph-sparkle"></i> Kompres File</span>
+</div>
+<button type="submit" id="submitBtn" class="btn-execute">
+<i class="ph-bold ph-lightning"></i>
+<span>Mulai Kompresi</span>
 </button>
 </form>
 </section>
-<section id="statusSection" class="card status-card file-hidden">
-<div class="status-header">
-<h2 class="status-title">Proses Kompresi</h2>
-<span id="statusBadge" class="status-badge status-pending">Menunggu Antrean</span>
+<section id="statusSection" class="workspace status-card file-hidden">
+<div class="status-summary">
+<div class="status-summary-left">
+<h2 class="status-title">Status Pekerjaan</h2>
+<p id="statusMessage" class="status-subtitle">Menyiapkan antrean...</p>
 </div>
-<div class="progress-container">
-<div class="progress-bar-track">
-<div id="progressBar" class="progress-bar-fill"></div>
+<span id="statusBadge" class="status-badge status-pending">Menunggu</span>
 </div>
-<div class="progress-meta">
-<span id="statusMessage" class="status-message">Memulai...</span>
-<span id="progressText" class="progress-percent">0%</span>
+<div class="meter-bar">
+<div id="progressBar" class="meter-fill"></div>
 </div>
+<div class="meter-info">
+<span class="meter-hint">Algoritma Pure Status CFR 30fps 720p</span>
+<span id="progressText" class="meter-percent">0%</span>
 </div>
-<div id="workerWakeupBanner" class="worker-wakeup-banner file-hidden">
-<span><i class="ph ph-clock"></i> Menunggu antrean server...</span>
-<button type="button" id="btnTriggerWorkerNow" class="btn-trigger-worker"><i class="ph ph-lightning"></i> Bangunkan Sekarang</button>
+<div id="workerWakeupBanner" class="banner-notice file-hidden">
+<div class="banner-text">
+<i class="ph-bold ph-hourglass-simple"></i>
+<span>Runner server dalam status siaga.</span>
 </div>
-<div class="steps-list">
-<div class="step-item" id="stepUpload">
-<span class="step-dot"></span>
-<span class="step-label">Upload file ke server</span>
+<button type="button" id="btnTriggerWorkerNow" class="btn-notice-action">Bangunkan Sekarang</button>
 </div>
-<div class="step-item" id="stepCompress">
-<span class="step-dot"></span>
-<span class="step-label">Kompres file HD</span>
-</div>
-<div class="step-item" id="stepDrive">
-<span class="step-dot"></span>
-<span class="step-label">Menyimpan file hasil</span>
+<div class="flow-steps">
+<div class="step-node" id="stepUpload">
+<span class="node-num">01</span>
+<div class="node-info">
+<span class="node-title">Unggah Berkas</span>
+<span class="node-desc">Transmisi data ke server</span>
 </div>
 </div>
-<div id="resultBox" class="result-box file-hidden">
-<h3 class="result-title">Selesai! File Siap Digunakan</h3>
-<p class="result-desc">File berhasil dioptimasi anti-pecah:</p>
-<div id="resultLinks" class="result-links"></div>
-<div class="guide-card">
-<span class="guide-title"><i class="ph ph-lightbulb"></i> Trik Pasang Status Anti-Pecah:</span>
-<ol class="guide-steps">
-<li>Simpan file di atas ke galeri HP Anda.</li>
-<li>Buka WhatsApp &gt; Kirim ke chat sendiri (<em>You</em>) atau teman.</li>
-<li>Tekan tombol <strong>Teruskan (<i class="ph ph-share-fat"></i>)</strong> pada video &gt; pilih <strong>Status Saya</strong>.</li>
-<li><strong>Hasil:</strong> Status tayang jernih tanpa kompresi ulang!</li>
+<div class="step-node" id="stepCompress">
+<span class="node-num">02</span>
+<div class="node-info">
+<span class="node-title">Encoding FFmpeg</span>
+<span class="node-desc">Profil H.264 Main 3.1 CFR</span>
+</div>
+</div>
+<div class="step-node" id="stepDrive">
+<span class="node-num">03</span>
+<div class="node-info">
+<span class="node-title">Penyimpanan Hasil</span>
+<span class="node-desc">Sinkronisasi berkas siap unduh</span>
+</div>
+</div>
+</div>
+<div id="resultBox" class="result-deck file-hidden">
+<div class="result-header">
+<div class="result-badge-success"><i class="ph-bold ph-check"></i> Selesai</div>
+<h3 class="result-heading">Berkas Siap Dipasang</h3>
+<p class="result-subheading">Kualitas video telah dikunci agar tidak ditranscode ulang oleh WhatsApp.</p>
+</div>
+<div id="resultLinks" class="result-items-grid"></div>
+<div class="editorial-tip">
+<div class="tip-header">
+<i class="ph-bold ph-whatsapp-logo"></i>
+<span>Prosedur Pasang Status 100% Anti-Pecah</span>
+</div>
+<ol class="tip-steps">
+<li><span class="step-counter">1</span><span class="step-text">Simpan berkas hasil ke galeri perangkat Anda.</span></li>
+<li><span class="step-counter">2</span><span class="step-text">Buka WhatsApp &gt; Kirim video ke ruang chat pribadi Anda (<em>Kirim Pesan ke Diri Sendiri</em>).</span></li>
+<li><span class="step-counter">3</span><span class="step-text">Di dalam chat, tekan panah <strong>Teruskan (<i class="ph-bold ph-share-fat"></i>)</strong> lalu arahkan ke <strong>Status Saya</strong>.</span></li>
+<li><span class="step-counter">4</span><span class="step-text">WhatsApp meloloskan media tanpa kompresi kedua sehingga video tetap jernih dan tajam!</span></li>
 </ol>
 </div>
-<button type="button" id="resetBtn" class="btn-secondary">Kompres File Lain</button>
+<button type="button" id="resetBtn" class="btn-ghost-secondary">Kompres Berkas Lain</button>
 </div>
-<div id="errorBox" class="error-box file-hidden">
-<h3 class="error-title">Terjadi Kendala</h3>
-<p id="errorMessage" class="error-desc"></p>
-<button type="button" id="retryBtn" class="btn-secondary">Coba Lagi</button>
+<div id="errorBox" class="error-deck file-hidden">
+<div class="error-header">
+<i class="ph-bold ph-warning-circle"></i>
+<h3 class="error-heading">Proses Terhenti</h3>
+</div>
+<p id="errorMessage" class="error-detail"></p>
+<button type="button" id="retryBtn" class="btn-ghost-secondary">Coba Kembali</button>
 </div>
 </section>
 </div>
