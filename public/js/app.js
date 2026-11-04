@@ -1,7 +1,7 @@
 (function() {
   'use strict';
   const CONFIG = {
-    gasUrl: 'https://script.google.com/macros/s/AKfycbx_MASUKKAN_ID_SCRIPT_ANDA/exec',
+    gasUrl: 'https://script.google.com/macros/s/AKfycbxe9zt4vCzW5XYA0NrADf0u4KHY8SZ5o8-T7RkGgH1zOuJXQ23BIAqldwrz8wfeuPOA/exec',
     databaseUrl: 'https://pure-status-default-rtdb.firebaseio.com'
   };
   const uploadForm = document.getElementById('uploadForm');
