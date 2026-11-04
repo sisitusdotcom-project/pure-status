@@ -352,7 +352,7 @@
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'completed');
           setStepStatus(stepDrive, 'completed');
-          updateProgressUI(100, job.message || 'Berkas selesai dan otomatis diunduh.', 'Selesai', 'status-completed');
+          updateProgressUI(100, job.message || 'Berkas selesai dan siap disimpan.', 'Selesai', 'status-completed');
           renderResultLinks(job.parts || [], job.rawFileUrl);
           resultBox.classList.remove('file-hidden');
           submitBtn.disabled = false;
@@ -365,16 +365,14 @@
       } catch (e) {}
     }, 2500);
   }
-  function triggerAutoDownload(url, fileName) {
-    if (!url) return;
-    const a = document.createElement('a');
-    a.href = url;
-    if (fileName) a.download = fileName;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  function triggerAutoDownload(url) {
+    if (!url) return false;
+    try {
+      const win = window.open(url, '_blank');
+      return !(!win || win.closed || typeof win.closed === 'undefined');
+    } catch (e) {
+      return false;
+    }
   }
   function renderResultLinks(parts, fallbackUrl) {
     resultLinks.innerHTML = '';
@@ -384,20 +382,30 @@
     }
     if (list.length === 0) return;
     list.forEach(function(part, idx) {
-      const itemEl = document.createElement('a');
+      const itemEl = document.createElement('div');
       itemEl.className = 'result-link-item';
       const label = list.length > 1 ? 'Bagian ' + (idx + 1) + ' (' + part.fileName + ')' : part.fileName;
       const downloadTarget = part.downloadUrl || part.viewUrl || '#';
-      itemEl.href = downloadTarget;
-      itemEl.download = part.fileName || 'status_hd.mp4';
-      itemEl.target = '_blank';
-      itemEl.rel = 'noopener noreferrer';
-      itemEl.innerHTML = '<span class="result-link-title"><i class="ph ph-check-circle"></i> ' + label + '</span>' +
-        '<span class="result-status-tag"><i class="ph ph-download-simple"></i> Otomatis Terunduh</span>';
+      let autoSuccess = false;
+      try {
+        autoSuccess = triggerAutoDownload(downloadTarget);
+      } catch (e) {
+        autoSuccess = false;
+      }
+      if (autoSuccess) {
+        itemEl.innerHTML = '<span class="result-link-title"><i class="ph ph-video"></i> ' + label + '</span>' +
+          '<span class="result-status-tag"><i class="ph ph-check-circle"></i> Terunduh</span>';
+      } else {
+        itemEl.innerHTML = '<span class="result-link-title"><i class="ph ph-video"></i> ' + label + '</span>' +
+          '<a href="' + downloadTarget + '" download="' + (part.fileName || 'status_hd.mp4') + '" target="_blank" rel="noopener noreferrer" class="result-btn-download"><i class="ph ph-download-simple"></i> Unduh File</a>';
+        const btn = itemEl.querySelector('.result-btn-download');
+        if (btn) {
+          btn.addEventListener('click', function() {
+            btn.innerHTML = '<i class="ph ph-check"></i> Mengunduh...';
+          });
+        }
+      }
       resultLinks.appendChild(itemEl);
-      setTimeout(function() {
-        triggerAutoDownload(downloadTarget, part.fileName);
-      }, idx * 600);
     });
   }
   function handleJobError(msg) {
