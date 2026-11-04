@@ -77,7 +77,14 @@
   function handleFileSelected(file) {
     selectedFile = file;
     previewFileName.textContent = file.name;
-    previewFileSize.textContent = formatBytes(file.size);
+    if (file.size > 35 * 1024 * 1024) {
+      previewFileSize.textContent = formatBytes(file.size) + ' - Melebihi batas maksimal (Maks 35 MB)';
+      submitBtn.disabled = true;
+      alert('Ukuran berkas ' + formatBytes(file.size) + ' terlalu besar. Batas maksimal pengunggahan Google Apps Script adalah 35 MB untuk mencegah peramban kehabisan memori (Aw, Snap Out of Memory). Silakan gunakan video di bawah 35 MB.');
+    } else {
+      previewFileSize.textContent = formatBytes(file.size);
+      submitBtn.disabled = false;
+    }
     dropZone.classList.add('file-hidden');
     filePreviewContainer.classList.remove('file-hidden');
   }
@@ -117,6 +124,10 @@
     e.preventDefault();
     if (!selectedFile) {
       alert('Silakan pilih berkas video atau gambar terlebih dahulu.');
+      return;
+    }
+    if (selectedFile.size > 35 * 1024 * 1024) {
+      alert('Ukuran berkas melebihi batas 35 MB. Silakan pilih berkas yang lebih kecil.');
       return;
     }
     const phone = formatPhoneNumber(phoneNumberInput.value);
