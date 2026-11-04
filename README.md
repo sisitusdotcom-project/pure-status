@@ -1,4 +1,4 @@
-# WhatsApp Pure Status Engine (HD Media Optimizer)
+# Unblur WhatsApp Status (HD Media Optimizer)
 
 Aplikasi dan sistem pemrosesan media berbasis web untuk memastikan video dan foto yang diunggah ke WhatsApp Status tetap jernih dan **tidak pecah**, meniru mekanisme optimasi presisi seperti aplikasi **Pure Status** di Android.
 
@@ -75,7 +75,6 @@ wahtsapp-pure-status/
 │   ├── compressor.js                   # Mesin FFmpeg & Sharp (Auto-installer terintegrasi)
 │   ├── driveService.js                 # Handler Google Drive (Download/Upload)
 │   ├── rtdbService.js                  # Handler Firebase Admin SDK & REST fallback
-│   ├── whatsappService.js              # Handler pengiriman media ke WhatsApp Gateway
 │   └── index.js                        # Worker pemantau antrean + Server Web/API internal
 ├── .env.example                        # Template variabel lingkungan
 ├── .gitignore                          # Filter file privat & secrets

@@ -9,10 +9,8 @@
         "type": "object",
         "properties": {
           "jobId": { "type": "string" },
-          "phoneNumber": { "type": "string" },
-          "caption": { "type": "string" },
           "splitVideo": { "type": "boolean" },
-          "burnCaption": { "type": "boolean" },
+          "splitDuration": { "type": "number" },
           "mediaType": { "type": "string", "enum": ["video", "image"] },
           "rawFileId": { "type": "string" },
           "rawFileName": { "type": "string" },
@@ -20,7 +18,7 @@
           "status": { "type": "string", "enum": ["pending", "processing"] },
           "createdAt": { "type": "number" }
         },
-        "required": ["jobId", "phoneNumber", "mediaType", "rawFileId", "status", "createdAt"]
+        "required": ["jobId", "mediaType", "rawFileId", "status", "createdAt"]
       }
     },
     "jobs": {
@@ -29,9 +27,7 @@
         "type": "object",
         "properties": {
           "jobId": { "type": "string" },
-          "phoneNumber": { "type": "string" },
-          "caption": { "type": "string" },
-          "status": { "type": "string", "enum": ["pending", "processing", "compressing", "uploading", "sending", "completed", "error"] },
+          "status": { "type": "string", "enum": ["pending", "processing", "compressing", "uploading", "completed", "error"] },
           "progress": { "type": "number", "minimum": 0, "maximum": 100 },
           "mediaType": { "type": "string" },
           "parts": {

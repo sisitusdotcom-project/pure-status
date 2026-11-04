@@ -4,14 +4,14 @@
       ".read": true,
       ".write": true,
       "$jobId": {
-        ".validate": "newData.hasChildren(['phoneNumber', 'mediaType', 'rawFileId', 'status'])"
+        ".validate": "newData.hasChildren(['mediaType', 'rawFileId', 'status'])"
       }
     },
     "jobs": {
       ".read": true,
       ".write": true,
       "$jobId": {
-        ".indexOn": ["status", "createdAt", "phoneNumber"]
+        ".indexOn": ["status", "createdAt"]
       }
     },
     "settings": {

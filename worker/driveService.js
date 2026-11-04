@@ -76,7 +76,7 @@ async function uploadToDrive(gasUrl, filePath, folderKey = 'compressed') {
   if (response.data && response.data.status === 'success') {
     return response.data;
   }
-  throw new Error(response.data?.message || 'Gagal mengunggah file ke Google Drive');
+  throw new Error(response.data?.message || 'Gagal mengunggah file ke server');
 }
 module.exports = {
   extractDriveFileId,

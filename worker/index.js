@@ -253,7 +253,7 @@ if (RUN_ONCE) {
   runSingleBatch();
 } else {
   server.listen(PORT, () => {
-    process.stdout.write(`WhatsApp Pure Status Worker & Web berjalan di port ${PORT}\n`);
+    process.stdout.write(`Unblur WhatsApp Status Worker & Web berjalan di port ${PORT}\n`);
   });
   setInterval(pollQueue, POLL_INTERVAL_MS);
   pollQueue();

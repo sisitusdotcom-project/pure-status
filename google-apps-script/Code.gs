@@ -9,7 +9,7 @@ function normalizeParam(value) {
   return String(value);
 }
 function doGet(e) {
-  return jsonResponse({ status: 'ok', service: 'WhatsApp Pure Status Drive Storage' }, 200);
+  return jsonResponse({ status: 'ok', service: 'Unblur WhatsApp Status Storage' }, 200);
 }
 function doPost(e) {
   try {
