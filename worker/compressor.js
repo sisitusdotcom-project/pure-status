@@ -69,6 +69,38 @@ function processVideoSegment(inputPath, outputPath, startTime, duration, caption
       .run();
   });
 }
+function convertPhotoToStatusVideo(inputPath, outputPath, captionText, burnCaption) {
+  return new Promise((resolve, reject) => {
+    let filterString = 'scale=720:1280:force_original_aspect_ratio=decrease,pad=720:1280:(ow-iw)/2:(oh-ih)/2:black,setsar=1';
+    if (burnCaption && captionText) {
+      const sanitized = captionText.replace(/'/g, '').replace(/:/g, '\\:');
+      filterString += `,drawtext=text='${sanitized}':fontcolor=white:fontsize=28:box=1:boxcolor=black@0.6:boxborderw=12:x=(w-text_w)/2:y=h-th-90`;
+    }
+    ffmpeg()
+      .input(inputPath)
+      .inputOptions(['-loop 1'])
+      .duration(5)
+      .videoFilters(filterString)
+      .videoCodec('libx264')
+      .outputOptions([
+        '-preset fast',
+        '-profile:v main',
+        '-level 3.1',
+        '-crf 22',
+        '-maxrate 2500k',
+        '-bufsize 5000k',
+        '-r 30',
+        '-g 60',
+        '-pix_fmt yuv420p',
+        '-movflags +faststart'
+      ])
+      .noAudio()
+      .output(outputPath)
+      .on('end', () => resolve(outputPath))
+      .on('error', (err) => reject(err))
+      .run();
+  });
+}
 async function compressVideo(inputPath, outputDir, options = {}) {
   const { splitVideo = true, caption = '', burnCaption = false } = options;
   const probeData = await getVideoDuration(inputPath);
@@ -88,7 +120,8 @@ async function compressVideo(inputPath, outputDir, options = {}) {
         fileName: outName,
         partIndex: i + 1,
         totalParts: totalSegments,
-        duration: segDuration
+        duration: segDuration,
+        mediaType: 'video'
       });
     }
   } else {
@@ -100,13 +133,26 @@ async function compressVideo(inputPath, outputDir, options = {}) {
       fileName: outName,
       partIndex: 1,
       totalParts: 1,
-      duration: duration
+      duration: duration,
+      mediaType: 'video'
     });
   }
   return results;
 }
 async function compressImage(inputPath, outputDir, options = {}) {
-  const { caption = '', burnCaption = false } = options;
+  const { caption = '', burnCaption = false, asVideo = true } = options;
+  if (asVideo) {
+    const outName = 'status_pure_hd.mp4';
+    const outPath = path.join(outputDir, outName);
+    await convertPhotoToStatusVideo(inputPath, outPath, caption, burnCaption);
+    return [{
+      filePath: outPath,
+      fileName: outName,
+      partIndex: 1,
+      totalParts: 1,
+      mediaType: 'video'
+    }];
+  }
   const outName = 'status_pure.jpg';
   const outPath = path.join(outputDir, outName);
   let pipeline = sharp(inputPath).rotate().resize(1080, 1920, {
@@ -132,7 +178,8 @@ async function compressImage(inputPath, outputDir, options = {}) {
     filePath: outPath,
     fileName: outName,
     partIndex: 1,
-    totalParts: 1
+    totalParts: 1,
+    mediaType: 'image'
   }];
 }
 module.exports = {

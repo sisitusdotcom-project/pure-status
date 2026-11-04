@@ -74,7 +74,8 @@ async function processJob(jobId, jobData) {
     } else {
       processedFiles = await compressImage(rawFilePath, outputDir, {
         caption: jobData.caption || '',
-        burnCaption: !!jobData.burnCaption
+        burnCaption: !!jobData.burnCaption,
+        asVideo: jobData.photoMode !== 'image'
       });
     }
     await rtdb.updateJob(jobId, {

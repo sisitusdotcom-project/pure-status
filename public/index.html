@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WhatsApp Pure Status - Kompresi Video & Gambar Anti Pecah</title>
+<title>WhatsApp Pure Status - Kompresi Video & Foto Anti Pecah</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -14,7 +14,7 @@
 <div class="logo-icon">HD</div>
 <div>
 <h1 class="app-title">WhatsApp Pure Status</h1>
-<p class="app-subtitle">Kompresi Presisi Video & Foto Khusus Status WhatsApp Tanpa Pecah</p>
+<p class="app-subtitle">Kompresi Pintar & Video Splitter Khusus Status WhatsApp Tanpa Blur</p>
 </div>
 </div>
 </div>
@@ -24,18 +24,10 @@
 <section class="card upload-card">
 <form id="uploadForm" class="form-container">
 <div class="form-group">
-<label for="phoneNumber" class="form-label">Nomor WhatsApp Tujuan</label>
-<div class="input-phone-wrap">
-<span class="phone-prefix">+62</span>
-<input type="tel" id="phoneNumber" class="form-input" placeholder="81234567890" required autocomplete="tel">
-</div>
-<span class="form-hint">Media hasil kompresi akan langsung dikirimkan ke nomor ini.</span>
-</div>
-<div class="form-group">
-<label class="form-label">Pilih Video atau Gambar</label>
+<label class="form-label">Pilih Video atau Foto</label>
 <div id="dropZone" class="drop-zone">
 <div class="drop-zone-icon">📁</div>
-<div class="drop-zone-text">Klik atau seret file video / foto ke sini</div>
+<div class="drop-zone-text">Klik atau seret video / foto ke sini</div>
 <div class="drop-zone-sub">Mendukung MP4, MOV, MKV, JPG, PNG, WEBP (Maksimal 35 MB)</div>
 <input type="file" id="fileInput" class="file-input-hidden" accept="video/*,image/*" required>
 </div>
@@ -47,22 +39,34 @@
 <button type="button" id="removeFileBtn" class="btn-remove-file">Ganti File</button>
 </div>
 </div>
-<div class="form-group">
-<label for="captionInput" class="form-label">Teks Caption (Opsional)</label>
-<textarea id="captionInput" class="form-textarea" rows="3" placeholder="Tulis caption sebelum media diproses..."></textarea>
-</div>
-<div class="form-group options-group">
+<div id="videoOptionsGroup" class="form-group options-group">
+<span class="options-title">Pengaturan Video Status</span>
 <label class="checkbox-label">
 <input type="checkbox" id="splitVideoOption" checked>
-<span>Pecah otomatis video per 30 detik untuk Status WhatsApp</span>
+<span>Pecah otomatis video per 30.00 detik untuk Status WhatsApp (Video Splitter)</span>
 </label>
 <label class="checkbox-label">
 <input type="checkbox" id="burnCaptionOption">
-<span>Tampilkan teks caption di dalam video / gambar (Overlay)</span>
+<span>Tampilkan teks caption di dalam video (Overlay Text)</span>
 </label>
 </div>
+<div id="photoOptionsGroup" class="form-group options-group file-hidden">
+<span class="options-title">Pengaturan Optimasi Foto</span>
+<label class="checkbox-label">
+<input type="radio" name="photoMode" id="photoModeVideo" value="video" checked>
+<span>Ubah Foto Jadi Video Status HD (Rekomendasi PureStatus: Mencegah WhatsApp menghancurkan kualitas foto)<span class="badge-recommend">Anti Pecah</span></span>
+</label>
+<label class="checkbox-label">
+<input type="radio" name="photoMode" id="photoModeImage" value="image">
+<span>Format Foto Asli JPEG HD (Chroma 4:2:0 Kualitas Maksimal)</span>
+</label>
+</div>
+<div class="form-group">
+<label for="captionInput" class="form-label">Teks Caption (Opsional)</label>
+<textarea id="captionInput" class="form-textarea" rows="2" placeholder="Tulis caption sebelum media diproses..."></textarea>
+</div>
 <button type="submit" id="submitBtn" class="btn-primary">
-<span class="btn-text">Kompres & Kirim ke WhatsApp</span>
+<span class="btn-text">🚀 Kompres Presisi Pure Status</span>
 </button>
 </form>
 </section>
@@ -83,25 +87,29 @@
 <div class="steps-list">
 <div class="step-item" id="stepUpload">
 <span class="step-dot"></span>
-<span class="step-label">Unggah Berkas ke Google Drive</span>
+<span class="step-label">Unggah Berkas ke Penyimpanan Cloud</span>
 </div>
 <div class="step-item" id="stepCompress">
 <span class="step-dot"></span>
-<span class="step-label">Kompresi Algoritma Pure Status (FFmpeg / Image)</span>
+<span class="step-label">Kompresi Pre-Compression Pure Status (FFmpeg / Image)</span>
 </div>
 <div class="step-item" id="stepDrive">
 <span class="step-dot"></span>
-<span class="step-label">Simpan Output ke Google Drive</span>
-</div>
-<div class="step-item" id="stepSend">
-<span class="step-dot"></span>
-<span class="step-label">Kirim Langsung ke Nomor WhatsApp</span>
+<span class="step-label">Penyelesaian Berkas Siap Status WhatsApp</span>
 </div>
 </div>
 <div id="resultBox" class="result-box file-hidden">
-<h3 class="result-title">Selesai! Media Telah Dikirim</h3>
-<p class="result-desc">File berkualitas tinggi telah dikirim ke nomor WhatsApp Anda. Anda juga dapat melihat atau mengunduh hasilnya langsung:</p>
+<h3 class="result-title">Selesai! Berkas HD Siap Dipasang</h3>
+<p class="result-desc">Media Anda telah diproses dengan standar Pure Status. Unduh ke galeri atau bagikan langsung ke status WhatsApp Anda:</p>
 <div id="resultLinks" class="result-links"></div>
+<div class="guide-card">
+<span class="guide-title">📌 Cara Pasang ke Status WhatsApp Tanpa Pecah:</span>
+<ol class="guide-steps">
+<li>Klik tombol <strong>Unduh</strong> di atas untuk menyimpan berkas ke galeri HP Anda.</li>
+<li>Buka aplikasi WhatsApp &gt; tab <strong>Status</strong> &gt; pilih berkas hasil unduhan.</li>
+<li><strong>Penting:</strong> Jangan memotong atau menambahkan stiker/filter di dalam WhatsApp, karena WhatsApp akan merusak kompresi yang sudah disiapkan.</li>
+</ol>
+</div>
 <button type="button" id="resetBtn" class="btn-secondary">Proses Media Lain</button>
 </div>
 <div id="errorBox" class="error-box file-hidden">
@@ -114,7 +122,7 @@
 </main>
 <footer class="app-footer">
 <div class="footer-inner">
-<p>&copy; WhatsApp Pure Status Engine. Kolaborasi Firebase RTDB & Google Drive.</p>
+<p>&copy; WhatsApp Pure Status Engine. ByeBye Blur Status Web Edition.</p>
 </div>
 </footer>
 </div>
