@@ -6,15 +6,10 @@ const url = require('url');
 const RTDBService = require('./rtdbService');
 const { downloadFileFromDrive, appendChunkFromDrive, uploadToDrive } = require('./driveService');
 const { compressVideo, compressImage } = require('./compressor');
-const { sendToWhatsApp } = require('./whatsappService');
 const DATABASE_URL = process.env.FIREBASE_DATABASE_URL || 'https://pure-status-default-rtdb.firebaseio.com';
 const DATABASE_SECRET = process.env.FIREBASE_DB_SECRET;
 const SERVICE_ACCOUNT_PATH = process.env.FIREBASE_SERVICE_ACCOUNT_KEY || path.join(process.cwd(), 'serviceAccountKey.json');
 const GAS_URL = process.env.GOOGLE_APPS_SCRIPT_URL;
-const WA_CONFIG = {
-  gatewayUrl: process.env.WA_GATEWAY_URL,
-  apiKey: process.env.WA_API_KEY
-};
 const POLL_INTERVAL_MS = parseInt(process.env.POLL_INTERVAL_MS || '3000', 10);
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const RUN_ONCE = process.env.RUN_ONCE === 'true';
@@ -121,14 +116,6 @@ async function processJob(jobId, jobData) {
           viewUrl: ''
         });
       });
-    }
-    if (WA_CONFIG.gatewayUrl && !WA_CONFIG.gatewayUrl.includes('TOKEN')) {
-      await rtdb.updateJob(jobId, {
-        status: 'sending',
-        progress: 85,
-        message: 'Mengirimkan media ke WhatsApp tujuan...'
-      });
-      await sendToWhatsApp(WA_CONFIG, jobData.phoneNumber, processedFiles, jobData.caption || '');
     }
     await rtdb.updateJob(jobId, {
       status: 'completed',

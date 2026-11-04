@@ -73,12 +73,12 @@
       setTimeout(function() {
         workerWakeupBanner.classList.add('file-hidden');
         btnTriggerWorkerNow.disabled = false;
-        btnTriggerWorkerNow.textContent = '⚡ Bangunkan Worker Sekarang';
+        btnTriggerWorkerNow.textContent = '⚡ Bangunkan Sekarang';
       }, 2500);
     } else {
       alert('Gagal membangunkan worker: ' + (result.reason || 'Koneksi terputus') + '. Antrean akan diproses otomatis oleh runner cloud.');
       btnTriggerWorkerNow.disabled = false;
-      btnTriggerWorkerNow.textContent = '⚡ Bangunkan Worker Sekarang';
+      btnTriggerWorkerNow.textContent = '⚡ Bangunkan Sekarang';
     }
   });
   dropZone.addEventListener('click', function() {
@@ -329,11 +329,13 @@
         if (!job) return;
         if (job.status === 'processing' || job.status === 'compressing') {
           workerWakeupBanner.classList.add('file-hidden');
+          errorBox.classList.add('file-hidden');
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'active');
           updateProgressUI(job.progress || 50, job.message || 'Mengompresi media HD...', 'Diproses', 'status-processing');
         } else if (job.status === 'uploading') {
           workerWakeupBanner.classList.add('file-hidden');
+          errorBox.classList.add('file-hidden');
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'completed');
           setStepStatus(stepDrive, 'active');
@@ -341,6 +343,7 @@
         } else if (job.status === 'completed') {
           clearInterval(pollInterval);
           workerWakeupBanner.classList.add('file-hidden');
+          errorBox.classList.add('file-hidden');
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'completed');
           setStepStatus(stepDrive, 'completed');
@@ -351,34 +354,11 @@
         } else if (job.status === 'error') {
           clearInterval(pollInterval);
           workerWakeupBanner.classList.add('file-hidden');
+          resultBox.classList.add('file-hidden');
           handleJobError(job.error || job.message || 'Proses gagal.');
         }
       } catch (e) {}
     }, 2500);
-  }
-  async function shareFileToWhatsApp(url, fileName) {
-    try {
-      const res = await fetch(url);
-      const blob = await res.blob();
-      const file = new File([blob], fileName, { type: blob.type || 'video/mp4' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          title: 'WhatsApp Status HD',
-          text: 'Status HD PureStatus',
-          files: [file]
-        });
-      } else {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        alert('Berkas sedang diunduh ke galeri. Buka WhatsApp > Status Saya, lalu pilih berkas ini.');
-      }
-    } catch (e) {
-      window.open(url, '_blank');
-    }
   }
   function renderResultLinks(parts) {
     resultLinks.innerHTML = '';
@@ -386,23 +366,14 @@
     parts.forEach(function(part, idx) {
       const itemEl = document.createElement('div');
       itemEl.className = 'result-link-item';
-      const label = parts.length > 1 ? 'Part ' + (idx + 1) + ' (' + part.fileName + ')' : part.fileName;
+      const label = parts.length > 1 ? 'Bagian ' + (idx + 1) + ' (' + part.fileName + ')' : part.fileName;
       const downloadTarget = part.downloadUrl || part.viewUrl || '#';
       itemEl.innerHTML = '<span class="result-link-title">🎬 ' + label + '</span>' +
         '<div class="result-link-actions">' +
-        '<button type="button" class="btn-share-wa result-btn" data-url="' + downloadTarget + '" data-name="' + part.fileName + '">📲 Bagikan ke WhatsApp</button>' +
-        '<a href="' + downloadTarget + '" download="' + part.fileName + '" target="_blank" rel="noopener noreferrer" class="result-btn-download">Unduh</a>' +
-        (part.viewUrl ? '<a href="' + part.viewUrl + '" target="_blank" rel="noopener noreferrer" class="result-btn">Drive</a>' : '') +
+        '<a href="' + downloadTarget + '" download="' + part.fileName + '" target="_blank" rel="noopener noreferrer" class="result-btn-download">⬇️ Unduh Video HD</a>' +
+        (part.viewUrl ? '<a href="' + part.viewUrl + '" target="_blank" rel="noopener noreferrer" class="result-btn-drive">Drive</a>' : '') +
         '</div>';
       resultLinks.appendChild(itemEl);
-    });
-    const shareBtns = resultLinks.querySelectorAll('.btn-share-wa');
-    shareBtns.forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        const u = btn.getAttribute('data-url');
-        const n = btn.getAttribute('data-name');
-        shareFileToWhatsApp(u, n);
-      });
     });
   }
   function handleJobError(msg) {

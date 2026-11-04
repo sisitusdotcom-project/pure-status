@@ -38,7 +38,4 @@ jobs:
           FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
           FIREBASE_DB_SECRET: ${{ secrets.FIREBASE_DB_SECRET }}
           GOOGLE_APPS_SCRIPT_URL: ${{ secrets.GOOGLE_APPS_SCRIPT_URL }}
-          WA_GATEWAY_URL: ${{ secrets.WA_GATEWAY_URL }}
-          WA_API_KEY: ${{ secrets.WA_API_KEY }}
         run: node worker/index.js
-
