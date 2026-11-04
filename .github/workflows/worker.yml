@@ -41,3 +41,4 @@ jobs:
           WA_GATEWAY_URL: ${{ secrets.WA_GATEWAY_URL }}
           WA_API_KEY: ${{ secrets.WA_API_KEY }}
         run: node worker/index.js
+
