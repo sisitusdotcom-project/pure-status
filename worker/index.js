@@ -44,8 +44,8 @@ async function processJob(jobId, jobData) {
   try {
     await rtdb.updateJob(jobId, {
       status: 'processing',
-      progress: 10,
-      message: 'Mengunduh file dari Google Drive...'
+      progress: 40,
+      message: 'Worker cloud aktif. Mengunduh berkas mentah...'
     });
     const rawExt = path.extname(jobData.rawFileName || '').toLowerCase() || (jobData.mediaType === 'video' ? '.mp4' : '.jpg');
     const rawFilePath = path.join(jobTmpDir, `raw_${jobId}${rawExt}`);
@@ -65,8 +65,8 @@ async function processJob(jobId, jobData) {
     }
     await rtdb.updateJob(jobId, {
       status: 'compressing',
-      progress: 35,
-      message: 'Menerapkan kompresi Pure Status...'
+      progress: 65,
+      message: 'Menerapkan kompresi Pure Status HD (FFmpeg)...'
     });
     const outputDir = path.join(jobTmpDir, 'output');
     if (!fs.existsSync(outputDir)) {
@@ -85,8 +85,8 @@ async function processJob(jobId, jobData) {
     }
     await rtdb.updateJob(jobId, {
       status: 'uploading',
-      progress: 70,
-      message: 'Menyimpan hasil ke Google Drive...'
+      progress: 85,
+      message: 'Menyimpan video HD ke Google Drive...'
     });
     const uploadedParts = [];
     if (GAS_URL && !GAS_URL.includes('MASUKKAN_ID')) {

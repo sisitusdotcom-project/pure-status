@@ -308,7 +308,7 @@
       ]);
       triggerGitHubWorker().then(function(res) {
         if (res.success) {
-          updateProgressUI(30, 'Worker Cloud otomatis aktif! Sedang memproses media...', 'Diproses', 'status-processing');
+          updateProgressUI(30, 'Worker Cloud dipanggil. Menunggu mesin aktif...', 'Antrean', 'status-pending');
           workerWakeupBanner.classList.add('file-hidden');
         } else {
           workerWakeupBanner.classList.remove('file-hidden');
@@ -321,12 +321,17 @@
   });
   function startPollingJob(jobId) {
     if (pollInterval) clearInterval(pollInterval);
+    let pendingSeconds = 0;
     pollInterval = setInterval(async function() {
       try {
         const response = await fetch(getDbUrl('/jobs/' + jobId));
         const job = await response.json();
         if (!job) return;
-        if (job.status === 'processing' || job.status === 'compressing') {
+        if (job.status === 'pending') {
+          pendingSeconds += 2.5;
+          const pendingPercent = Math.min(38, 30 + Math.floor(pendingSeconds / 5));
+          updateProgressUI(pendingPercent, 'Menyiapkan mesin cloud worker (' + Math.round(pendingSeconds) + ' dtk)...', 'Booting Cloud', 'status-pending');
+        } else if (job.status === 'processing' || job.status === 'compressing') {
           workerWakeupBanner.classList.add('file-hidden');
           errorBox.classList.add('file-hidden');
           setStepStatus(stepUpload, 'completed');
@@ -338,7 +343,7 @@
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'completed');
           setStepStatus(stepDrive, 'active');
-          updateProgressUI(job.progress || 75, job.message || 'Menyiapkan berkas status...', 'Menyiapkan', 'status-processing');
+          updateProgressUI(job.progress || 85, job.message || 'Menyiapkan berkas status...', 'Menyiapkan', 'status-processing');
         } else if (job.status === 'completed') {
           clearInterval(pollInterval);
           workerWakeupBanner.classList.add('file-hidden');
