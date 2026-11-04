@@ -5,7 +5,8 @@
   "main": "worker/index.js",
   "scripts": {
     "start": "node worker/index.js",
-    "dev": "nodemon worker/index.js"
+    "dev": "nodemon worker/index.js",
+    "build": "echo 'Build OK'"
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
