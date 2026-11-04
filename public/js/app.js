@@ -71,12 +71,12 @@
       setTimeout(function() {
         workerWakeupBanner.classList.add('file-hidden');
         btnTriggerWorkerNow.disabled = false;
-        btnTriggerWorkerNow.textContent = '⚡ Bangunkan Sekarang';
+        btnTriggerWorkerNow.innerHTML = '<i class="ph ph-lightning"></i> Bangunkan Sekarang';
       }, 2500);
     } else {
       alert('Gagal membangunkan worker: ' + (result.reason || 'Koneksi terputus') + '. Antrean akan diproses otomatis oleh runner cloud.');
       btnTriggerWorkerNow.disabled = false;
-      btnTriggerWorkerNow.textContent = '⚡ Bangunkan Sekarang';
+      btnTriggerWorkerNow.innerHTML = '<i class="ph ph-lightning"></i> Bangunkan Sekarang';
     }
   });
   dropZone.addEventListener('click', function() {
@@ -377,9 +377,9 @@
       itemEl.className = 'result-link-item';
       const label = list.length > 1 ? 'Bagian ' + (idx + 1) + ' (' + part.fileName + ')' : part.fileName;
       const downloadTarget = part.downloadUrl || part.viewUrl || '#';
-      itemEl.innerHTML = '<span class="result-link-title">🎬 ' + label + '</span>' +
+      itemEl.innerHTML = '<span class="result-link-title"><i class="ph ph-video"></i> ' + label + '</span>' +
         '<div class="result-link-actions">' +
-        '<a href="' + downloadTarget + '" download="' + part.fileName + '" target="_blank" rel="noopener noreferrer" class="result-btn-download">⬇️ Unduh File</a>' +
+        '<a href="' + downloadTarget + '" download="' + part.fileName + '" target="_blank" rel="noopener noreferrer" class="result-btn-download"><i class="ph ph-download-simple"></i> Unduh File</a>' +
         (part.viewUrl ? '<a href="' + part.viewUrl + '" target="_blank" rel="noopener noreferrer" class="result-btn-drive">Server</a>' : '') +
         '</div>';
       resultLinks.appendChild(itemEl);
