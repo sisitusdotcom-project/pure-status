@@ -352,7 +352,7 @@
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'completed');
           setStepStatus(stepDrive, 'completed');
-          updateProgressUI(100, job.message || 'Berkas selesai dan siap dibagikan ke WhatsApp.', 'Selesai', 'status-completed');
+          updateProgressUI(100, job.message || 'Berkas selesai dan otomatis diunduh.', 'Selesai', 'status-completed');
           renderResultLinks(job.parts || [], job.rawFileUrl);
           resultBox.classList.remove('file-hidden');
           submitBtn.disabled = false;
@@ -365,6 +365,17 @@
       } catch (e) {}
     }, 2500);
   }
+  function triggerAutoDownload(url, fileName) {
+    if (!url) return;
+    const a = document.createElement('a');
+    a.href = url;
+    if (fileName) a.download = fileName;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
   function renderResultLinks(parts, fallbackUrl) {
     resultLinks.innerHTML = '';
     let list = Array.isArray(parts) ? parts : (parts && typeof parts === 'object' ? Object.values(parts) : []);
@@ -373,16 +384,20 @@
     }
     if (list.length === 0) return;
     list.forEach(function(part, idx) {
-      const itemEl = document.createElement('div');
+      const itemEl = document.createElement('a');
       itemEl.className = 'result-link-item';
       const label = list.length > 1 ? 'Bagian ' + (idx + 1) + ' (' + part.fileName + ')' : part.fileName;
       const downloadTarget = part.downloadUrl || part.viewUrl || '#';
-      itemEl.innerHTML = '<span class="result-link-title"><i class="ph ph-video"></i> ' + label + '</span>' +
-        '<div class="result-link-actions">' +
-        '<a href="' + downloadTarget + '" download="' + part.fileName + '" target="_blank" rel="noopener noreferrer" class="result-btn-download"><i class="ph ph-download-simple"></i> Unduh File</a>' +
-        (part.viewUrl ? '<a href="' + part.viewUrl + '" target="_blank" rel="noopener noreferrer" class="result-btn-drive">Server</a>' : '') +
-        '</div>';
+      itemEl.href = downloadTarget;
+      itemEl.download = part.fileName || 'status_hd.mp4';
+      itemEl.target = '_blank';
+      itemEl.rel = 'noopener noreferrer';
+      itemEl.innerHTML = '<span class="result-link-title"><i class="ph ph-check-circle"></i> ' + label + '</span>' +
+        '<span class="result-status-tag"><i class="ph ph-download-simple"></i> Otomatis Terunduh</span>';
       resultLinks.appendChild(itemEl);
+      setTimeout(function() {
+        triggerAutoDownload(downloadTarget, part.fileName);
+      }, idx * 600);
     });
   }
   function handleJobError(msg) {
