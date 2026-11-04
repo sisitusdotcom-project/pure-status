@@ -45,7 +45,7 @@ function processVideoSegment(inputPath, outputPath, startTime, duration, caption
         '-preset fast',
         '-profile:v main',
         '-level 3.1',
-        '-crf 23',
+        '-crf 22',
         '-maxrate 2500k',
         '-bufsize 5000k',
         '-r 30',
@@ -79,7 +79,7 @@ function convertPhotoToStatusVideo(inputPath, outputPath, captionText, burnCapti
     ffmpeg()
       .input(inputPath)
       .inputOptions(['-loop 1'])
-      .duration(5)
+      .duration(6)
       .videoFilters(filterString)
       .videoCodec('libx264')
       .outputOptions([
@@ -102,16 +102,17 @@ function convertPhotoToStatusVideo(inputPath, outputPath, captionText, burnCapti
   });
 }
 async function compressVideo(inputPath, outputDir, options = {}) {
-  const { splitVideo = true, caption = '', burnCaption = false } = options;
+  const { splitVideo = true, caption = '', burnCaption = false, splitDuration = 60 } = options;
   const probeData = await getVideoDuration(inputPath);
   const duration = probeData.duration;
   const hasAudio = probeData.hasAudio;
   const results = [];
-  if (splitVideo && duration > 30) {
-    const totalSegments = Math.ceil(duration / 30);
+  const segTime = Number(splitDuration) || 60;
+  if (splitVideo && duration > segTime) {
+    const totalSegments = Math.ceil(duration / segTime);
     for (let i = 0; i < totalSegments; i++) {
-      const start = i * 30;
-      const segDuration = Math.min(30, duration - start);
+      const start = i * segTime;
+      const segDuration = Math.min(segTime, duration - start);
       const outName = `status_part_${String(i + 1).padStart(3, '0')}.mp4`;
       const outPath = path.join(outputDir, outName);
       await processVideoSegment(inputPath, outPath, start, segDuration, caption, burnCaption, hasAudio);
@@ -125,7 +126,7 @@ async function compressVideo(inputPath, outputDir, options = {}) {
       });
     }
   } else {
-    const outName = 'status_single.mp4';
+    const outName = 'status_hd_60s.mp4';
     const outPath = path.join(outputDir, outName);
     await processVideoSegment(inputPath, outPath, null, null, caption, burnCaption, hasAudio);
     results.push({

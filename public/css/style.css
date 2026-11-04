@@ -35,6 +35,9 @@ body{font-family:var(--font);background-color:var(--bg-base);color:var(--text-ma
 .checkbox-label{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text-main);cursor:pointer;line-height:1.4;}
 .checkbox-label input[type="checkbox"],.checkbox-label input[type="radio"]{width:16px;height:16px;accent-color:var(--primary);cursor:pointer;margin-top:2px;flex-shrink:0;}
 .badge-recommend{background-color:rgba(16,185,129,0.2);color:var(--primary);font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:6px;}
+.split-choice-wrap{display:flex;gap:14px;margin-left:26px;flex-wrap:wrap;}
+.radio-mini{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);cursor:pointer;}
+.radio-mini input[type="radio"]{width:14px;height:14px;accent-color:var(--primary);cursor:pointer;}
 .btn-primary{display:flex;align-items:center;justify-content:center;width:100%;padding:14px 20px;background:linear-gradient(135deg,var(--primary),#10b981);color:#fff;font-size:15px;font-weight:700;border:none;border-radius:8px;cursor:pointer;box-shadow:0 4px 14px rgba(16,185,129,0.3);transition:transform 0.1s,background-color 0.2s;}
 .btn-primary:hover{background:linear-gradient(135deg,var(--primary-hover),var(--primary));transform:translateY(-1px);}
 .btn-primary:active{transform:translateY(1px);}

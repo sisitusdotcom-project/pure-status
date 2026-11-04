@@ -87,10 +87,10 @@
       videoOptionsGroup.classList.add('file-hidden');
       photoOptionsGroup.classList.remove('file-hidden');
     }
-    if (file.size > 35 * 1024 * 1024) {
-      previewFileSize.textContent = formatBytes(file.size) + ' - Terlalu besar (Maksimal 35 MB)';
+    if (file.size > 250 * 1024 * 1024) {
+      previewFileSize.textContent = formatBytes(file.size) + ' - Terlalu besar (Maksimal 250 MB)';
       submitBtn.disabled = true;
-      alert('Ukuran berkas ' + formatBytes(file.size) + ' melebihi batas 35 MB. Mohon pilih berkas di bawah 35 MB.');
+      alert('Ukuran berkas ' + formatBytes(file.size) + ' melebihi batas 250 MB.');
     } else {
       previewFileSize.textContent = formatBytes(file.size);
       submitBtn.disabled = false;
@@ -121,14 +121,88 @@
     stepEl.classList.remove('active', 'completed');
     if (status) stepEl.classList.add(status);
   }
+  async function uploadResumable(sessionUrl, file) {
+    const CHUNK_SIZE = 5 * 1024 * 1024;
+    let start = 0;
+    while (start < file.size) {
+      const end = Math.min(start + CHUNK_SIZE, file.size);
+      const chunk = file.slice(start, end);
+      const contentRange = 'bytes ' + start + '-' + (end - 1) + '/' + file.size;
+      const percent = Math.round((start / file.size) * 100);
+      updateProgressUI(Math.min(28, 5 + Math.round(percent * 0.23)), 'Mengunggah: ' + formatBytes(start) + ' / ' + formatBytes(file.size) + ' (' + percent + '%)', 'Mengunggah', 'status-processing');
+      const res = await fetch(sessionUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Range': contentRange
+        },
+        body: chunk
+      });
+      if (res.status === 200 || res.status === 201) {
+        const driveData = await res.json();
+        const fileId = driveData.id;
+        return {
+          status: 'success',
+          fileId: fileId,
+          fileName: file.name,
+          downloadUrl: 'https://drive.google.com/uc?export=download&id=' + fileId,
+          viewUrl: 'https://drive.google.com/file/d/' + fileId + '/view'
+        };
+      }
+      if (res.status === 308) {
+        start = end;
+      } else {
+        throw new Error('Gagal mengunggah potongan file (' + res.status + ')');
+      }
+    }
+  }
+  async function uploadFileToDrive(file) {
+    if (file.size > 20 * 1024 * 1024) {
+      try {
+        const sessionPayload = {
+          action: 'createSession',
+          fileName: file.name,
+          mimeType: file.type || 'video/mp4',
+          fileSize: file.size,
+          folderKey: 'raw'
+        };
+        const sessionRes = await fetch(CONFIG.gasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(sessionPayload)
+        });
+        const sessionData = await sessionRes.json();
+        if (sessionData && sessionData.status === 'success' && sessionData.sessionUrl) {
+          return await uploadResumable(sessionData.sessionUrl, file);
+        }
+      } catch (err) {}
+    }
+    const base64Data = await fileToBase64(file);
+    const gasPayload = {
+      action: 'upload',
+      fileName: file.name,
+      mimeType: file.type || 'video/mp4',
+      fileData: base64Data,
+      folderKey: 'raw'
+    };
+    const driveUploadRes = await fetch(CONFIG.gasUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(gasPayload)
+    });
+    const driveResult = await driveUploadRes.json();
+    if (!driveResult || driveResult.status !== 'success') {
+      throw new Error(driveResult?.message || 'Gagal mengunggah berkas.');
+    }
+    return driveResult;
+  }
   uploadForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     if (!selectedFile) {
       alert('Silakan pilih berkas video atau foto terlebih dahulu.');
       return;
     }
-    if (selectedFile.size > 35 * 1024 * 1024) {
-      alert('Ukuran berkas melebihi batas 35 MB.');
+    if (selectedFile.size > 250 * 1024 * 1024) {
+      alert('Ukuran berkas melebihi batas 250 MB.');
       return;
     }
     const caption = captionInput.value.trim();
@@ -136,6 +210,9 @@
     const mediaType = isVideo ? 'video' : 'image';
     const splitVideo = splitVideoOption.checked;
     const burnCaption = burnCaptionOption.checked;
+    let splitDuration = 60;
+    const splitDurEl = document.querySelector('input[name="splitDuration"]:checked');
+    if (splitDurEl) splitDuration = Number(splitDurEl.value) || 60;
     let photoMode = 'video';
     const photoModeInput = document.querySelector('input[name="photoMode"]:checked');
     if (photoModeInput) photoMode = photoModeInput.value;
@@ -147,26 +224,9 @@
     setStepStatus(stepUpload, 'active');
     setStepStatus(stepCompress, '');
     setStepStatus(stepDrive, '');
-    updateProgressUI(5, 'Mempersiapkan pengunggahan...', 'Mengunggah', 'status-processing');
+    updateProgressUI(5, 'Menghubungkan ke penyimpanan cloud...', 'Mengunggah', 'status-processing');
     try {
-      const base64Data = await fileToBase64(selectedFile);
-      updateProgressUI(15, 'Mengunggah ke Cloud Storage...', 'Mengunggah', 'status-processing');
-      const gasPayload = {
-        action: 'upload',
-        fileName: selectedFile.name,
-        mimeType: selectedFile.type || (isVideo ? 'video/mp4' : 'image/jpeg'),
-        fileData: base64Data,
-        folderKey: 'raw'
-      };
-      const driveUploadRes = await fetch(CONFIG.gasUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(gasPayload)
-      });
-      const driveResult = await driveUploadRes.json();
-      if (!driveResult || driveResult.status !== 'success') {
-        throw new Error(driveResult?.message || 'Gagal mengunggah berkas.');
-      }
+      const driveResult = await uploadFileToDrive(selectedFile);
       setStepStatus(stepUpload, 'completed');
       setStepStatus(stepCompress, 'active');
       updateProgressUI(30, 'Berkas terunggah. Memasukkan ke antrean proses...', 'Antrean', 'status-pending');
@@ -174,6 +234,7 @@
         jobId: jobId,
         caption: caption,
         splitVideo: splitVideo,
+        splitDuration: splitDuration,
         burnCaption: burnCaption,
         mediaType: mediaType,
         photoMode: photoMode,
@@ -209,7 +270,7 @@
         if (job.status === 'processing' || job.status === 'compressing') {
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'active');
-          updateProgressUI(job.progress || 50, job.message || 'Mengompresi media...', 'Diproses', 'status-processing');
+          updateProgressUI(job.progress || 50, job.message || 'Mengompresi media HD...', 'Diproses', 'status-processing');
         } else if (job.status === 'uploading') {
           setStepStatus(stepUpload, 'completed');
           setStepStatus(stepCompress, 'completed');
@@ -235,11 +296,11 @@
     try {
       const res = await fetch(url);
       const blob = await res.blob();
-      const file = new File([blob], fileName, { type: blob.type });
+      const file = new File([blob], fileName, { type: blob.type || 'video/mp4' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: 'WhatsApp Status HD',
-          text: 'Status HD dari WhatsApp Pure Status',
+          text: 'Status HD PureStatus',
           files: [file]
         });
       } else {
@@ -265,7 +326,7 @@
       const downloadTarget = part.downloadUrl || part.viewUrl || '#';
       itemEl.innerHTML = '<span class="result-link-title">🎬 ' + label + '</span>' +
         '<div class="result-link-actions">' +
-        '<button type="button" class="btn-share-wa result-btn" data-url="' + downloadTarget + '" data-name="' + part.fileName + '">📲 Bagikan ke Status</button>' +
+        '<button type="button" class="btn-share-wa result-btn" data-url="' + downloadTarget + '" data-name="' + part.fileName + '">📲 Bagikan ke WhatsApp</button>' +
         '<a href="' + downloadTarget + '" download="' + part.fileName + '" target="_blank" rel="noopener noreferrer" class="result-btn-download">Unduh</a>' +
         (part.viewUrl ? '<a href="' + part.viewUrl + '" target="_blank" rel="noopener noreferrer" class="result-btn">Drive</a>' : '') +
         '</div>';

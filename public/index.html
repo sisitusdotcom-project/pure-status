@@ -14,7 +14,7 @@
 <div class="logo-icon">HD</div>
 <div>
 <h1 class="app-title">WhatsApp Pure Status</h1>
-<p class="app-subtitle">Kompresi Pintar & Video Splitter Khusus Status WhatsApp Tanpa Blur</p>
+<p class="app-subtitle">Kompresi Pintar & Video Splitter Khusus Status WhatsApp 60 Detik HD</p>
 </div>
 </div>
 </div>
@@ -28,7 +28,7 @@
 <div id="dropZone" class="drop-zone">
 <div class="drop-zone-icon">📁</div>
 <div class="drop-zone-text">Klik atau seret video / foto ke sini</div>
-<div class="drop-zone-sub">Mendukung MP4, MOV, MKV, JPG, PNG, WEBP (Maksimal 35 MB)</div>
+<div class="drop-zone-sub">Mendukung MP4, MOV, MKV, JPG, PNG, WEBP (Bisa video besar hingga 200 MB)</div>
 <input type="file" id="fileInput" class="file-input-hidden" accept="video/*,image/*" required>
 </div>
 <div id="filePreviewContainer" class="file-preview-card file-hidden">
@@ -43,8 +43,18 @@
 <span class="options-title">Pengaturan Video Status</span>
 <label class="checkbox-label">
 <input type="checkbox" id="splitVideoOption" checked>
-<span>Pecah otomatis video per 30.00 detik untuk Status WhatsApp (Video Splitter)</span>
+<span>Pecah otomatis durasi video untuk Status WhatsApp (Video Splitter)</span>
 </label>
+<div class="split-choice-wrap">
+<label class="radio-mini">
+<input type="radio" name="splitDuration" value="60" checked>
+<span>60 Detik (Standar Baru WhatsApp Status HD)<span class="badge-recommend">Terbaru</span></span>
+</label>
+<label class="radio-mini">
+<input type="radio" name="splitDuration" value="30">
+<span>30 Detik (Format Lama)</span>
+</label>
+</div>
 <label class="checkbox-label">
 <input type="checkbox" id="burnCaptionOption">
 <span>Tampilkan teks caption di dalam video (Overlay Text)</span>
@@ -66,7 +76,7 @@
 <textarea id="captionInput" class="form-textarea" rows="2" placeholder="Tulis caption sebelum media diproses..."></textarea>
 </div>
 <button type="submit" id="submitBtn" class="btn-primary">
-<span class="btn-text">🚀 Kompres Presisi Pure Status</span>
+<span class="btn-text">🚀 Kompres Presisi Pure Status HD</span>
 </button>
 </form>
 </section>
@@ -87,11 +97,11 @@
 <div class="steps-list">
 <div class="step-item" id="stepUpload">
 <span class="step-dot"></span>
-<span class="step-label">Unggah Berkas ke Penyimpanan Cloud</span>
+<span class="step-label">Unggah Berkas ke Penyimpanan Cloud (Streaming Resumable)</span>
 </div>
 <div class="step-item" id="stepCompress">
 <span class="step-dot"></span>
-<span class="step-label">Kompresi Pre-Compression Pure Status (FFmpeg / Image)</span>
+<span class="step-label">Kompresi Pre-Compression Pure Status HD 720p 60s (FFmpeg)</span>
 </div>
 <div class="step-item" id="stepDrive">
 <span class="step-dot"></span>
@@ -100,14 +110,15 @@
 </div>
 <div id="resultBox" class="result-box file-hidden">
 <h3 class="result-title">Selesai! Berkas HD Siap Dipasang</h3>
-<p class="result-desc">Media Anda telah diproses dengan standar Pure Status. Unduh ke galeri atau bagikan langsung ke status WhatsApp Anda:</p>
+<p class="result-desc">Media Anda telah diproses dengan standar Pure Status. Unduh ke galeri atau bagikan langsung:</p>
 <div id="resultLinks" class="result-links"></div>
 <div class="guide-card">
-<span class="guide-title">📌 Cara Pasang ke Status WhatsApp Tanpa Pecah:</span>
+<span class="guide-title">💡 Trik Teruskan PureStatus (Forward to Status) Agar 100% Anti-Pecah:</span>
 <ol class="guide-steps">
-<li>Klik tombol <strong>Unduh</strong> di atas untuk menyimpan berkas ke galeri HP Anda.</li>
-<li>Buka aplikasi WhatsApp &gt; tab <strong>Status</strong> &gt; pilih berkas hasil unduhan.</li>
-<li><strong>Penting:</strong> Jangan memotong atau menambahkan stiker/filter di dalam WhatsApp, karena WhatsApp akan merusak kompresi yang sudah disiapkan.</li>
+<li>Klik tombol <strong>Unduh</strong> di atas untuk menyimpan video ke galeri HP Anda.</li>
+<li>Buka WhatsApp &gt; Masuk ke ruang chat Anda sendiri (fitur <em>Kirim Pesan ke Diri Sendiri / You</em>) atau kirim ke salah satu chat teman/grup.</li>
+<li>Di dalam chat tersebut, tekan tombol tanda <strong>Panah Teruskan (Forward ➡️)</strong> lalu pilih <strong>Status Saya</strong>.</li>
+<li><strong>Hasilnya:</strong> WhatsApp menganggap media tersebut sudah lolos validasi server dan TIDAK AKAN mengompresi ulang, sehingga status Anda tampil 100% jernih dan tajam!</li>
 </ol>
 </div>
 <button type="button" id="resetBtn" class="btn-secondary">Proses Media Lain</button>
