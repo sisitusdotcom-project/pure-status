@@ -35,6 +35,9 @@
   const stepDrive = document.getElementById('stepDrive');
   const resultBox = document.getElementById('resultBox');
   const resultLinks = document.getElementById('resultLinks');
+  const resultCaptionCard = document.getElementById('resultCaptionCard');
+  const resultCaptionText = document.getElementById('resultCaptionText');
+  const copyCaptionBtn = document.getElementById('copyCaptionBtn');
   const resetBtn = document.getElementById('resetBtn');
   const errorBox = document.getElementById('errorBox');
   const errorMessage = document.getElementById('errorMessage');
@@ -370,6 +373,12 @@
     if (list.length === 0 && fallbackUrl) {
       list = [{ fileName: 'status_hd_60s.mp4', downloadUrl: fallbackUrl }];
     }
+    if (captionText) {
+      resultCaptionText.textContent = captionText;
+      resultCaptionCard.classList.remove('file-hidden');
+    } else {
+      resultCaptionCard.classList.add('file-hidden');
+    }
     if (list.length === 0) return;
     list.forEach(function(part, idx) {
       const itemEl = document.createElement('div');
@@ -378,62 +387,10 @@
       const downloadTarget = part.downloadUrl || part.viewUrl || '#';
       itemEl.innerHTML = '<span class="result-link-title">🎬 ' + label + '</span>' +
         '<div class="result-link-actions">' +
-        '<button type="button" class="result-btn-share" data-url="' + downloadTarget + '" data-name="' + part.fileName + '">🚀 Bagikan ke WhatsApp Status</button>' +
         '<a href="' + downloadTarget + '" download="' + part.fileName + '" target="_blank" rel="noopener noreferrer" class="result-btn-download">⬇️ Unduh Video HD</a>' +
         (part.viewUrl ? '<a href="' + part.viewUrl + '" target="_blank" rel="noopener noreferrer" class="result-btn-drive">Drive</a>' : '') +
         '</div>';
       resultLinks.appendChild(itemEl);
-    });
-    resultLinks.querySelectorAll('.result-btn-share').forEach(function(shareBtn) {
-      shareBtn.addEventListener('click', async function() {
-        const fileUrl = shareBtn.getAttribute('data-url');
-        const fileName = shareBtn.getAttribute('data-name') || 'status_pure.mp4';
-        const originalText = shareBtn.textContent;
-        shareBtn.disabled = true;
-        shareBtn.textContent = '⏳ Membuka WhatsApp...';
-        try {
-          const resp = await fetch(fileUrl);
-          const blob = await resp.blob();
-          const mime = blob.type || (fileName.endsWith('.jpg') ? 'image/jpeg' : 'video/mp4');
-          const file = new File([blob], fileName, { type: mime });
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              title: 'WhatsApp Pure Status',
-              text: captionText || '',
-              files: [file]
-            });
-          } else {
-            if (captionText && navigator.clipboard) {
-              await navigator.clipboard.writeText(captionText);
-            }
-            const a = document.createElement('a');
-            a.href = fileUrl;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            alert('Teks caption telah disalin ke clipboard! Video mulai diunduh. Silakan buka WhatsApp dan pilih video tersebut.');
-            window.location.href = 'whatsapp://';
-          }
-        } catch (err) {
-          if (err.name !== 'AbortError') {
-            if (captionText && navigator.clipboard) {
-              await navigator.clipboard.writeText(captionText);
-            }
-            const a = document.createElement('a');
-            a.href = fileUrl;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            alert('Video diunduh dan caption disalin ke clipboard. Silakan buka WhatsApp dan pasang ke Status.');
-            window.location.href = 'whatsapp://';
-          }
-        } finally {
-          shareBtn.disabled = false;
-          shareBtn.textContent = originalText;
-        }
-      });
     });
     resultLinks.querySelectorAll('.result-btn-download').forEach(function(downloadLink) {
       downloadLink.addEventListener('click', function() {
@@ -443,6 +400,15 @@
       });
     });
   }
+  copyCaptionBtn.addEventListener('click', function() {
+    if (!currentJobCaption) return;
+    navigator.clipboard.writeText(currentJobCaption).then(function() {
+      copyCaptionBtn.textContent = '✅ Tersalin!';
+      setTimeout(function() {
+        copyCaptionBtn.textContent = '📋 Salin Teks';
+      }, 2000);
+    }).catch(function() {});
+  });
   function handleJobError(msg) {
     if (pollInterval) clearInterval(pollInterval);
     submitBtn.disabled = false;
@@ -454,6 +420,8 @@
     uploadForm.reset();
     selectedFile = null;
     currentJobCaption = '';
+    resultCaptionCard.classList.add('file-hidden');
+    resultCaptionText.textContent = '';
     dropZone.classList.remove('file-hidden');
     filePreviewContainer.classList.add('file-hidden');
     videoOptionsGroup.classList.remove('file-hidden');
